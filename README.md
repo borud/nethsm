@@ -2,6 +2,8 @@
 
 This is a Go library for working with the NetHSM.  It provides a wrapper around the API types that are generated from the OpenAPI specification to make life a bit easier for those using NetHSM.
 
+**Note that this is a work in progress**. The API may change before this reaches release.
+
 Where it makes sense we use the generated types in the API rather than create our own.  This results in less code to maintain, but may break things when new versions of the OpenAPI spec is published.
 
 ## Usage example
