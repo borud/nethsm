@@ -25,7 +25,7 @@ func main() {
         Username:      "admin",
         Password:      "verysecret",
         APIURL:        "https://127.0.0.1:8443/api/v1",
-        SkipTLSVerify: true,
+        TLSMode:  nethsm.TLSModeSkipVerify,
     }
 
     // Get information about vendor and product

@@ -11,8 +11,11 @@ import (
 // Provision the NetHSM and set unlock and admin passphrases.
 func (s *Session) Provision(unlockPass string, adminPass string) error {
 	slog.Debug("provisioning NetHSM, this may take some time", "apiURL", s.APIURL)
-	client, ctx := s.newClientAndContext()
-	_, err := client.ProvisionPost(ctx).
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
+	_, err = client.ProvisionPost(ctx).
 		ProvisionRequestData(
 			*api.NewProvisionRequestData(
 				unlockPass,

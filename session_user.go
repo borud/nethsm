@@ -8,7 +8,10 @@ import (
 
 // AddUser creates a new user.
 func (s *Session) AddUser(userID string, realname string, role string, passphrase string) error {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
 
 	roleValue := api.UserRole(role)
 	if !roleValue.IsValid() {
@@ -28,7 +31,10 @@ func (s *Session) AddUser(userID string, realname string, role string, passphras
 //
 // TODO(borud): should replace the api.UserData return value with a type from this package
 func (s *Session) GetUser(userID string) (*api.UserData, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return nil, err
+	}
 
 	userData, _, err := client.UsersUserIDGet(ctx, userID).Execute()
 	if err != nil {
@@ -40,7 +46,10 @@ func (s *Session) GetUser(userID string) (*api.UserData, error) {
 
 // ListUsers lists usernames.  If the namespace is set it lists the users for that namespace.
 func (s *Session) ListUsers() ([]string, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return []string{}, err
+	}
 
 	users, _, err := client.UsersGet(ctx).Execute()
 	if err != nil {
@@ -57,9 +66,12 @@ func (s *Session) ListUsers() ([]string, error) {
 
 // DeleteUser deletes user identified by userID.
 func (s *Session) DeleteUser(userID string) error {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
 
-	_, err := client.UsersUserIDDelete(ctx, userID).Execute()
+	_, err = client.UsersUserIDDelete(ctx, userID).Execute()
 	if err != nil {
 		return fmt.Errorf("failed to delete user [%s]: %w", userID, err)
 	}

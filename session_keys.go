@@ -53,7 +53,11 @@ func (s *Session) GenerateKey(keyID string, keyType api.KeyType, keyMechanisms [
 	// requestData.SetRestrictions()
 
 	// Create the key
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
+
 	_, resp, err := client.KeysGeneratePost(ctx).KeyGenerateRequestData(*requestData).Execute()
 	if err != nil {
 		return errors.Join(err, asError(resp))
@@ -63,7 +67,11 @@ func (s *Session) GenerateKey(keyID string, keyType api.KeyType, keyMechanisms [
 
 // GetPublicKey fetches the public key for keyID from NetHSM.
 func (s *Session) GetPublicKey(keyID string) (crypto.PublicKey, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return nil, err
+	}
+
 	pub, resp, err := client.KeysKeyIDGet(ctx, keyID).Execute()
 	if err != nil {
 		return nil, errors.Join(err, asError(resp))
@@ -74,7 +82,10 @@ func (s *Session) GetPublicKey(keyID string) (crypto.PublicKey, error) {
 
 // ListKeys returns an array of key names.
 func (s *Session) ListKeys() ([]string, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return []string{}, err
+	}
 
 	keyItems, resp, err := client.KeysGet(ctx).Execute()
 	if err != nil {
@@ -93,7 +104,10 @@ func (s *Session) ListKeys() ([]string, error) {
 // the CSR as a string in PEM format since that is usually the most practical
 // format users of this library will be interested in.
 func (s *Session) GenerateCSR(keyID string, subject pkix.Name, email string) (string, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return "", err
+	}
 
 	dn := pkixNameToDistinguishedName(subject)
 	dn.EmailAddress = &email
@@ -126,7 +140,10 @@ func (s *Session) Sign(keyID string, signatureAlgorithm x509.SignatureAlgorithm,
 		return "", ErrInvalidSigningAlgorithm
 	}
 
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return "", err
+	}
 
 	res, resp, err := client.KeysKeyIDSignPost(ctx, keyID).
 		SignRequestData(api.SignRequestData{
@@ -223,7 +240,10 @@ func (s *Session) SetCertificate(keyID string, certPEM []byte) error {
 		}
 	}()
 
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
 	resp, err := client.KeysKeyIDCertPut(ctx, keyID).Body(r).Execute()
 	if err != nil {
 		return errors.Join(err, asError(resp))
@@ -234,7 +254,10 @@ func (s *Session) SetCertificate(keyID string, certPEM []byte) error {
 
 // GetCertificate returns the certificate for a given keyID
 func (s *Session) GetCertificate(keyID string) (string, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return "", err
+	}
 
 	file, resp, err := client.KeysKeyIDCertGet(ctx, keyID).Execute()
 	if err != nil {
@@ -252,7 +275,10 @@ func (s *Session) GetCertificate(keyID string) (string, error) {
 
 // DeleteKey deletes a key from the NetHSM
 func (s *Session) DeleteKey(keyID string) error {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
 
 	resp, err := client.KeysKeyIDDelete(ctx, keyID).Execute()
 	if err != nil {
@@ -263,7 +289,10 @@ func (s *Session) DeleteKey(keyID string) error {
 
 // DeleteCertificate deletes a certificate from the NetHSM
 func (s *Session) DeleteCertificate(keyID string) error {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return err
+	}
 
 	resp, err := client.KeysKeyIDCertDelete(ctx, keyID).Execute()
 	if err != nil {
@@ -275,7 +304,10 @@ func (s *Session) DeleteCertificate(keyID string) error {
 // EncryptSymmetric is used to encrypt data using a symmetric (AES) key identified by keyID.  The only
 // mode available is CBC.  This function takes care of padding the data using blocksize of 16.
 func (s *Session) EncryptSymmetric(keyID string, message []byte, initialVector []byte) ([]byte, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return nil, err
+	}
 
 	// AES block size
 	blockSize := 16
@@ -308,7 +340,10 @@ func (s *Session) EncryptSymmetric(keyID string, message []byte, initialVector [
 // DecryptSymmetric decrypts enciphered message usig the key identified by keyID. This function takes
 // care of unpadding the data before returning it.
 func (s *Session) DecryptSymmetric(keyID string, encipheredMessage []byte, initialVector []byte) ([]byte, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return nil, err
+	}
 
 	iv := base64.StdEncoding.EncodeToString(initialVector)
 

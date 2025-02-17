@@ -11,10 +11,10 @@ import (
 func main() {
 	// Create a session
 	session := nethsm.Session{
-		Username:      "admin",
-		Password:      "verysecret",
-		APIURL:        "https://127.0.0.1:8443/api/v1",
-		SkipTLSVerify: true,
+		Username: "admin",
+		Password: "verysecret",
+		APIURL:   "https://127.0.0.1:8443/api/v1",
+		TLSMode:  nethsm.TLSModeSkipVerify,
 	}
 
 	// Get information about vendor and product

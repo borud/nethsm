@@ -32,6 +32,8 @@ var (
 	ErrBase64Decode            = errors.New("error decoding base64")
 	ErrInitialVectorMismatch   = errors.New("initial vector mismatch")
 	ErrUnsupportedAlgorithm    = errors.New("unsupported algorithm")
+	ErrAddingTLSCertificate    = errors.New("error adding TLS certificate")
+	ErrTLSCertificateMismatch  = errors.New("NetHSM server TLS certificate mismatch")
 )
 
 // asError takes a pointer to an http.Response and returns an error type.
