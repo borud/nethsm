@@ -2,8 +2,8 @@ github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c h1:udKWzYgxTojEK
 github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
 github.com/Microsoft/go-winio v0.4.14 h1:+hMXMk01us9KgxGb7ftKQt2Xpf5hH/yky+TDA+qxleU=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
-github.com/borud/udock v0.1.0 h1:8+BFK7AVjXiHmbaq04B0KBQGON5BAG6tiOTEiUbmjos=
-github.com/borud/udock v0.1.0/go.mod h1:3Ck3S5nbkcFy6Gl8dq2VDBOgWEy3wSuQirlVJyx8dh8=
+github.com/borud/udock v0.1.1 h1:6Iq/cdc0QhTO1UZD78ABXqfhpq1JoaZk4ysn8bsMRLc=
+github.com/borud/udock v0.1.1/go.mod h1:3Ck3S5nbkcFy6Gl8dq2VDBOgWEy3wSuQirlVJyx8dh8=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/containerd/log v0.1.0 h1:TCJt7ioM2cr/tfR8GPbGf9/VRAX8D2B4PjzCpfX540I=

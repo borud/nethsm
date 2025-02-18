@@ -3,7 +3,7 @@ module github.com/borud/nethsm
 go 1.23.6
 
 require (
-	github.com/borud/udock v0.1.0
+	github.com/borud/udock v0.1.1
 	github.com/docker/docker v27.5.1+incompatible
 	github.com/stretchr/testify v1.10.0
 	github.com/zenazn/pkcs7pad v0.0.0-20170308005700-253a5b1f0e03
