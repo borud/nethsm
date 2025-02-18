@@ -2,7 +2,11 @@
 
 This is a Go library for working with the NetHSM.  It provides a wrapper around the API types that are generated from the OpenAPI specification to make life a bit easier for those using NetHSM.
 
-**Note that this is a work in progress**. The API may change before this reaches release.
+## WARNING
+
+**Note that this is a work in progress**. The API will have breaking changes  before this reaches release version v1.0.0 so use this at your own risk.
+
+### Generated Types
 
 Where it makes sense we use the generated types in the API rather than create our own.  This results in less code to maintain, but may break things when new versions of the OpenAPI spec is published.
 
@@ -25,7 +29,7 @@ func main() {
         Username:      "admin",
         Password:      "verysecret",
         APIURL:        "https://127.0.0.1:8443/api/v1",
-        SkipTLSVerify: true,
+        TLSMode:  nethsm.TLSModeSkipVerify,
     }
 
     // Get information about vendor and product

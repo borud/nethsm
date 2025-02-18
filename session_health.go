@@ -8,7 +8,10 @@ import (
 
 // GetHealthState of the NetHSM
 func (s *Session) GetHealthState() (api.SystemState, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return "", err
+	}
 
 	response, _, err := client.HealthStateGet(ctx).Execute()
 	if err != nil {
@@ -20,7 +23,10 @@ func (s *Session) GetHealthState() (api.SystemState, error) {
 
 // GetHealthReady returns true if the NetHSM is to accept traffic (implies "Operational" state)
 func (s *Session) GetHealthReady() (bool, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return false, err
+	}
 
 	response, err := client.HealthReadyGet(ctx).Execute()
 	if err != nil {
@@ -40,7 +46,10 @@ func (s *Session) GetHealthReady() (bool, error) {
 // GetHealthAlive returns true if the NetHSM is alive, but not ready to accept
 // traffic (implies Locked or Unprovisioned)
 func (s *Session) GetHealthAlive() (bool, error) {
-	client, ctx := s.newClientAndContext()
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return false, err
+	}
 
 	response, err := client.HealthAliveGet(ctx).Execute()
 	if err != nil {

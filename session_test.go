@@ -17,6 +17,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	bogusTLSCertificate = []byte(`
+-----BEGIN CERTIFICATE-----
+MIICMzCCAZygAwIBAgIJALiPnVsvq8dsMA0GCSqGSIb3DQEBBQUAMFMxCzAJBgNV
+BAYTAlVTMQwwCgYDVQQIEwNmb28xDDAKBgNVBAcTA2ZvbzEMMAoGA1UEChMDZm9v
+MQwwCgYDVQQLEwNmb28xDDAKBgNVBAMTA2ZvbzAeFw0xMzAzMTkxNTQwMTlaFw0x
+ODAzMTgxNTQwMTlaMFMxCzAJBgNVBAYTAlVTMQwwCgYDVQQIEwNmb28xDDAKBgNV
+BAcTA2ZvbzEMMAoGA1UEChMDZm9vMQwwCgYDVQQLEwNmb28xDDAKBgNVBAMTA2Zv
+bzCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAzdGfxi9CNbMf1UUcvDQh7MYB
+OveIHyc0E0KIbhjK5FkCBU4CiZrbfHagaW7ZEcN0tt3EvpbOMxxc/ZQU2WN/s/wP
+xph0pSfsfFsTKM4RhTWD2v4fgk+xZiKd1p0+L4hTtpwnEw0uXRVd0ki6muwV5y/P
++5FHUeldq+pgTcgzuK8CAwEAAaMPMA0wCwYDVR0PBAQDAgLkMA0GCSqGSIb3DQEB
+BQUAA4GBAJiDAAtY0mQQeuxWdzLRzXmjvdSuL9GoyT3BF/jSnpxz5/58dba8pWen
+v3pj4P3w5DoOso0rzkZy2jEsEitlVM2mLSbQpMM+MUVQCQoiG6W9xuCFuxSrwPIS
+pAqEAuV4DNoxQKKWmhVv+J0ptMWD25Pnpxeq5sXzghfJnslJlQND
+-----END CERTIFICATE-----`)
+)
+
 func TestSession(t *testing.T) {
 	if os.Getenv("TEST_TAG") != "slowtest" {
 		t.Skip("Skipping test because TEST_TAG is not set to slowtest")
@@ -33,10 +51,10 @@ func TestSession(t *testing.T) {
 	})
 
 	session := &Session{
-		Username:      "admin",
-		Password:      dh.AdminPassword(),
-		APIURL:        dh.APIURL(),
-		SkipTLSVerify: true,
+		Username: "admin",
+		Password: dh.AdminPassword(),
+		APIURL:   dh.APIURL(),
+		TLSMode:  TLSModeSkipVerify,
 	}
 
 	// Provision the NetHSM
@@ -123,10 +141,10 @@ func TestSession(t *testing.T) {
 	require.NoError(t, session.AddUser("operator", "The Operator", "Operator", "verysecret"))
 
 	operatorSession := &Session{
-		Username:      "operator",
-		Password:      "verysecret",
-		APIURL:        dh.APIURL(),
-		SkipTLSVerify: true,
+		Username: "operator",
+		Password: "verysecret",
+		APIURL:   dh.APIURL(),
+		TLSMode:  TLSModeSkipVerify,
 	}
 
 	someData := []byte("This is some data that we want to sign")
@@ -270,6 +288,26 @@ func TestSession(t *testing.T) {
 	decryptedData2, err := operatorSession.DecryptSymmetric("key128", encryptedData2, initialVector)
 	require.NoError(t, err)
 	require.Equal(t, secretMessage, decryptedData2)
+
+	// Test using TLS certificate from NetHSM
+	tlsCertificate, err := session.GetTLSCertificate()
+	require.NoError(t, err)
+
+	tlsTestSession := &Session{
+		Username:          "admin",
+		Password:          dh.AdminPassword(),
+		APIURL:            dh.APIURL(),
+		ServerCertificate: []byte(tlsCertificate),
+		TLSMode:           TLSModeWithoutSANCheck,
+	}
+
+	_, err = tlsTestSession.GetInfo()
+	require.NoError(t, err)
+
+	// Now we modify the certificate and see if that triggers the correct error
+	tlsTestSession.ServerCertificate = bogusTLSCertificate
+	_, err = tlsTestSession.GetInfo()
+	require.ErrorIs(t, err, ErrTLSCertificateMismatch)
 
 	// TODO(borud): uncomment these
 	// Test locking the NetHSM
