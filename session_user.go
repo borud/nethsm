@@ -7,6 +7,8 @@ import (
 )
 
 // AddUser creates a new user.
+//
+// TODO(borud): replace role string type with api.UserRole
 func (s *Session) AddUser(userID string, realname string, role string, passphrase string) error {
 	client, ctx, err := s.newClientAndContext()
 	if err != nil {
@@ -28,8 +30,6 @@ func (s *Session) AddUser(userID string, realname string, role string, passphras
 }
 
 // GetUser gets the user data for user identified by userID
-//
-// TODO(borud): should replace the api.UserData return value with a type from this package
 func (s *Session) GetUser(userID string) (*api.UserData, error) {
 	client, ctx, err := s.newClientAndContext()
 	if err != nil {

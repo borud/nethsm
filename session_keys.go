@@ -193,10 +193,8 @@ func (s *Session) CreateCertificate(param CSRSigningParameters) (string, error) 
 	}
 
 	parent := &template
-
 	// if we are not self-signing the parent value set above is overridden.
 	if !param.SelfSign {
-		parent = &template
 		pemBytes, err := s.GetCertificate(param.SigningKeyID)
 		if err != nil {
 			return "", fmt.Errorf("error fetching signing certificate for keyID [%s]: %w", param.SigningKeyID, err)
@@ -208,7 +206,7 @@ func (s *Session) CreateCertificate(param CSRSigningParameters) (string, error) 
 		}
 	}
 
-	certDERBytes, err := x509.CreateCertificate(nil, &template, parent, hsmSigner.Public(), hsmSigner)
+	certDERBytes, err := x509.CreateCertificate(nil, &template, parent, csr.PublicKey, hsmSigner)
 	if err != nil {
 		return "", fmt.Errorf("error creating certificate: %w", err)
 	}
