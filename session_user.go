@@ -1,6 +1,7 @@
 package nethsm
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/borud/nethsm/api"
@@ -21,9 +22,9 @@ func (s *Session) AddUser(userID string, realname string, role string, passphras
 	}
 
 	userPostData := api.NewUserPostData(realname, roleValue, passphrase)
-	res, err := client.UsersUserIDPut(ctx, userID).UserPostData(*userPostData).Execute()
+	resp, err := client.UsersUserIDPut(ctx, userID).UserPostData(*userPostData).Execute()
 	if err != nil {
-		return fmt.Errorf("failed to create user [%s] res[%+v]: %w", userID, res, err)
+		return errors.Join(ErrUserCreateFailed, asError(resp), err)
 	}
 
 	return nil
@@ -36,9 +37,9 @@ func (s *Session) GetUser(userID string) (*api.UserData, error) {
 		return nil, err
 	}
 
-	userData, _, err := client.UsersUserIDGet(ctx, userID).Execute()
+	userData, resp, err := client.UsersUserIDGet(ctx, userID).Execute()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user [%s]: %w", userID, err)
+		return nil, errors.Join(ErrUserGetFailed, asError(resp), err)
 	}
 
 	return userData, nil
@@ -51,9 +52,9 @@ func (s *Session) ListUsers() ([]string, error) {
 		return []string{}, err
 	}
 
-	users, _, err := client.UsersGet(ctx).Execute()
+	users, resp, err := client.UsersGet(ctx).Execute()
 	if err != nil {
-		return []string{}, fmt.Errorf("failed to list users: %w", err)
+		return []string{}, errors.Join(ErrUsersListFailed, asError(resp), err)
 	}
 
 	userList := make([]string, len(users))
@@ -71,9 +72,9 @@ func (s *Session) DeleteUser(userID string) error {
 		return err
 	}
 
-	_, err = client.UsersUserIDDelete(ctx, userID).Execute()
+	resp, err := client.UsersUserIDDelete(ctx, userID).Execute()
 	if err != nil {
-		return fmt.Errorf("failed to delete user [%s]: %w", userID, err)
+		return errors.Join(ErrUserDeleteFailed, asError(resp))
 	}
 
 	return nil

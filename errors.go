@@ -34,6 +34,10 @@ var (
 	ErrUnsupportedAlgorithm    = errors.New("unsupported algorithm")
 	ErrAddingTLSCertificate    = errors.New("error adding TLS certificate")
 	ErrTLSCertificateMismatch  = errors.New("NetHSM server TLS certificate mismatch")
+	ErrUserCreateFailed        = errors.New("failed to create user")
+	ErrUserGetFailed           = errors.New("failed to get user")
+	ErrUserDeleteFailed        = errors.New("failed to delete user")
+	ErrUsersListFailed         = errors.New("failed to list users")
 )
 
 // asError takes a pointer to an http.Response and returns an error type.
