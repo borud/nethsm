@@ -105,20 +105,32 @@ func TestSession(t *testing.T) {
 	require.NoError(t, err)
 	require.IsType(t, &rsa.PublicKey{}, pubA)
 
+	_, err = session.GetKey("keyA")
+	require.NoError(t, err)
+
 	// Make sure we can handle ED25519 public key
 	pubB, err := session.GetPublicKey("keyB")
 	require.NoError(t, err)
 	require.IsType(t, ed25519.PublicKey{}, pubB)
+
+	_, err = session.GetKey("keyB")
+	require.NoError(t, err)
 
 	// Make sure we can handle ECDSA P_384 public key
 	pubC, err := session.GetPublicKey("keyC")
 	require.NoError(t, err)
 	require.IsType(t, &ecdsa.PublicKey{}, pubC)
 
+	_, err = session.GetKey("keyC")
+	require.NoError(t, err)
+
 	// Make sure we can handle ECDSA P_521 public key
 	pubD, err := session.GetPublicKey("keyD")
 	require.NoError(t, err)
 	require.IsType(t, &ecdsa.PublicKey{}, pubD)
+
+	_, err = session.GetKey("keyD")
+	require.NoError(t, err)
 
 	// Generate CSR and check the result
 	subject := pkix.Name{

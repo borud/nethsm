@@ -80,6 +80,21 @@ func (s *Session) GetPublicKey(keyID string) (crypto.PublicKey, error) {
 	return decodePublicKey(pub)
 }
 
+// GetKey fetches the (public) key for keyID and returns the api.PublicKey type.
+func (s *Session) GetKey(keyID string) (*api.PublicKey, error) {
+	client, ctx, err := s.newClientAndContext()
+	if err != nil {
+		return nil, err
+	}
+
+	pub, resp, err := client.KeysKeyIDGet(ctx, keyID).Execute()
+	if err != nil {
+		return nil, errors.Join(err, asError(resp))
+	}
+
+	return pub, nil
+}
+
 // ListKeys returns an array of key names.
 func (s *Session) ListKeys() ([]string, error) {
 	client, ctx, err := s.newClientAndContext()
