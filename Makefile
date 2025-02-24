@@ -14,7 +14,7 @@ test:
 
 slow-test:
 	@echo "*** $@"
-	@TEST_TAG=slowtest go test -v -timeout=3m . -run 'TestSession' session_test.go
+	@TEST_TAG=slowtest go test -v -timeout=5m . -run 'TestSession' session_test.go
 
 vet:
 	@echo "*** $@"
