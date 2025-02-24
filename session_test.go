@@ -8,7 +8,10 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
+	"io"
 	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -321,12 +324,76 @@ func TestSession(t *testing.T) {
 	_, err = tlsTestSession.GetInfo()
 	require.ErrorIs(t, err, ErrTLSCertificateMismatch)
 
-	// TODO(borud): uncomment these
-	// Test locking the NetHSM
-	// require.NoError(t, session.Lock())
+	// ====== Test backup
 
-	// Test unlocking the NetHSM
-	// require.NoError(t, session.UnLock(dh.UnlockPassword()))
+	// Create a user that can perform backups.
+	require.NoError(t, session.AddUser("backup", "Backup User", string(api.USERROLE_BACKUP), "verysecret"))
+
+	// Set backup passphrase.
+	require.NoError(t, session.SetBackupPassword("backupPassword", ""))
+
+	// Create a session with the backup user.
+	backupSession := &Session{
+		Username:          "backup",
+		Password:          "verysecret",
+		APIURL:            dh.APIURL(),
+		ServerCertificate: []byte(tlsCertificate),
+		TLSMode:           TLSModeWithoutSANCheck,
+	}
+
+	// Perform backup
+	f, err := backupSession.Backup()
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, f.Close())
+	}()
+
+	// Read the backup and verify that it is not empty
+	backup, err := io.ReadAll(f)
+	require.NoError(t, err)
+	require.NotEmpty(t, backup)
+
+	// write the backup to temporary file
+	tempDir := t.TempDir()
+	backupFileName := path.Join(tempDir, "hsmbackup")
+	require.NoError(t, os.WriteFile(backupFileName, backup, 0644))
+
+	// Create docker with unprovisioned NetHSM
+	restoreDH, err := dockerhsm.Create()
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, restoreDH.Shutdown())
+	})
+
+	backupFile, err := os.Open(backupFileName)
+	require.NoError(t, err)
+
+	// Create session on NetHSM
+	restoreSession := &Session{
+		APIURL:  restoreDH.APIURL(),
+		TLSMode: TLSModeSkipVerify,
+	}
+
+	// Restore from the backup
+	require.NoError(t, restoreSession.Restore("backupPassword", backupFile))
+
+	// Create an admin session on the restored instance.
+	restoredAdminSession := &Session{
+		Username: "admin",
+		Password: dh.AdminPassword(), // use admin password from the restored NetHSM
+		APIURL:   restoreDH.APIURL(),
+		TLSMode:  TLSModeSkipVerify,
+	}
+
+	// Unlock the restored
+	require.NoError(t, restoredAdminSession.UnLock(dh.UnlockPassword()))
+
+	// List keys
+	keys, err := restoredAdminSession.ListKeys()
+	require.NoError(t, err)
+	require.NotEmpty(t, keys)
+
+	fmt.Println(keys)
 }
 
 func generateCSR(t *testing.T, session *Session, keyID string, subject pkix.Name, email string) string {
