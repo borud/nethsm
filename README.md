@@ -1,6 +1,6 @@
 # Go library for NetHSM
 
-This is a Go library for working with the NetHSM.  It provides a wrapper around the API types that are generated from the OpenAPI specification to make life a bit easier for those using NetHSM.
+This is a Go library for working with the [Nitrokey NetHSM](https://www.nitrokey.com/products/nethsm).  It provides a wrapper around the API types that are generated from the OpenAPI specification to make life a bit easier for those using Nitrokey NetHSM.
 
 ## WARNING
 
