@@ -7,7 +7,7 @@ This is a Go library for working with the [Nitrokey NetHSM](https://www.nitrokey
 
 ## WARNING
 
-**Note that this is a work in progress**. The API will have breaking changes  before this reaches release version v1.0.0 so use this at your own risk.
+**Note that this is a work in progress**. The API **will** have breaking changes  before this reaches release version v1.0.0 so use this at your own risk.
 
 ### Generated Types
 
