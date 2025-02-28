@@ -80,7 +80,7 @@ func (s *Session) newDialContextFunc() (contextDialerFunc, error) {
 		return nil, nil
 	}
 
-	slog.Info("using SSH tunnel", "tunnel", s.SSHTunnel)
+	slog.Debug("using SSH tunnel", "tunnel", s.SSHTunnel)
 
 	tunnel, err := tunnel.Create(tunnel.Config{Hops: s.SSHTunnel})
 	if err != nil {
