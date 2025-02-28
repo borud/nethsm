@@ -1,5 +1,8 @@
 # Go library for Nitrokey NetHSM
 
+[![Go Reference](https://pkg.go.dev/github.com/borud/nethsm.svg)](https://pkg.go.dev/github.com/borud/nethsm)
+
+
 This is a Go library for working with the [Nitrokey NetHSM](https://www.nitrokey.com/products/nethsm).  It provides a wrapper around the API types that are generated from the OpenAPI specification to make life a bit easier for those using Nitrokey NetHSM.
 
 ## WARNING
