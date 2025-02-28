@@ -72,4 +72,9 @@ func main() {
 
 ## Completeness
 
-This library is almost complete, but does not yet support tags for keys and descryption for asymmetric keys.  These will be implemented if or when the need arises, but at the time of writing we have no use cases.
+This library does not support
+
+- Tags
+- Network configuration
+- Reboot
+- Software update
