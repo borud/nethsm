@@ -5,19 +5,33 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"log/slog"
+	"net"
 	"net/http"
+
+	"github.com/borud/tunnel"
 
 	api "github.com/borud/nethsm/api"
 )
 
 // Session is a NetHSM session.
 type Session struct {
-	Username          string
-	Password          string
-	APIURL            string
+	// Username we are logging into the NetHSM as.
+	Username string
+	// Password for the user we are logging in as
+	Password string
+	// APIURL of the NetHSM endpoint
+	APIURL string
+	// Server certificate of the NetHSM
 	ServerCertificate []byte
-	TLSMode           TLSMode
+	// TLSMode sets how we verify the server certificate
+	TLSMode TLSMode
+	// SSHTunnel is a list of hops on the form <username>@<host>:<sshport> to allow
+	// for tunneling through intermediate hosts
+	SSHTunnel []string
 }
+
+type contextDialerFunc func(ctx context.Context, network, addr string) (net.Conn, error)
 
 // TLSMode specifies what TLS checking we are going to do.
 type TLSMode uint8
@@ -35,11 +49,16 @@ const (
 
 // newClientAndContext is a convenience function that is used to get a usable REST client and a context object.
 func (s *Session) newClientAndContext() (*api.DefaultAPIService, context.Context, error) {
-	// Create the HTTP client depending on parameters
+	dialer, err := s.newDialContextFunc()
+	if err != nil {
+		return nil, nil, err
+	}
 
+	// Create the HTTP client depending on parameters
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: s.tlsConfig(),
+			DialContext:     dialer,
 		},
 	}
 
@@ -55,6 +74,29 @@ func (s *Session) newClientAndContext() (*api.DefaultAPIService, context.Context
 		}), nil
 }
 
+// newDialContextFunc returns a newDialContextFunc if we have defined an SSH tunnel and nil otherwise.
+func (s *Session) newDialContextFunc() (contextDialerFunc, error) {
+	if len(s.SSHTunnel) == 0 {
+		return nil, nil
+	}
+
+	slog.Info("using SSH tunnel", "tunnel", s.SSHTunnel)
+
+	tunnel, err := tunnel.Create(tunnel.Config{Hops: s.SSHTunnel})
+	if err != nil {
+		return nil, err
+	}
+
+	return func(_ context.Context, network, addr string) (net.Conn, error) {
+		conn, err := tunnel.Dial(network, addr)
+		if err != nil {
+			return nil, err
+		}
+		return conn, nil
+	}, nil
+}
+
+// tlsConfig constructs a TLS config based on the TLSMode and ServerCertificate fields.
 func (s *Session) tlsConfig() *tls.Config {
 	switch s.TLSMode {
 	case TLSModeSkipVerify:
