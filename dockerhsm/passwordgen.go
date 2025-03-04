@@ -1,17 +1,21 @@
 package dockerhsm
 
-import "crypto/rand"
+import (
+	"crypto/rand"
+	"math/big"
+)
 
-// generatePassword produces a random password of length n
 func generatePassword(n int) (string, error) {
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+"
-	b := make([]byte, n)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", err
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^*()-_=+"
+	charRunes := []rune(chars) // Convert to runes to ensure valid characters
+
+	password := make([]rune, n)
+	for i := range password {
+		index, err := rand.Int(rand.Reader, big.NewInt(int64(len(charRunes))))
+		if err != nil {
+			return "", err
+		}
+		password[i] = charRunes[index.Int64()]
 	}
-	for i := range b {
-		b[i] = chars[int(b[i])%len(chars)]
-	}
-	return string(b), nil
+	return string(password), nil
 }

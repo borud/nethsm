@@ -88,10 +88,13 @@ func (s *Session) newDialContextFunc() (contextDialerFunc, error) {
 	}
 
 	return func(_ context.Context, network, addr string) (net.Conn, error) {
+		slog.Debug("dial using tunnel", "tunnel", s.SSHTunnel, "network", network, "addr", addr)
 		conn, err := tunnel.Dial(network, addr)
 		if err != nil {
+			slog.Debug("dial failed", "tunnel", s.SSHTunnel, "network", network, "addr", addr)
 			return nil, err
 		}
+		slog.Debug("dial success", "tunnel", s.SSHTunnel, "network", network, "addr", addr)
 		return conn, nil
 	}, nil
 }
