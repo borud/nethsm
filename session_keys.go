@@ -140,7 +140,7 @@ func (s *Session) GenerateCSR(keyID string, subject pkix.Name, email string) (st
 //
 // This variant uses the Go standard library to create the certificate request
 // rather than the CSR generation endpoint of the NetHSM.  This is due to certain
-// differences in
+// differences in how the NetHSM and the Go standard library encodes the subject/dn.
 func (s *Session) GenerateCSRUsingGoStdlib(keyID string, subject pkix.Name, email string, alg x509.SignatureAlgorithm) (string, error) {
 	hsmSigner := &Signer{
 		KeyID:              keyID,

@@ -163,7 +163,7 @@ func TestSession(t *testing.T) {
 	}
 
 	// test local CSR generation.  Must be done by operator.
-	generateCSRLocal(t, operatorSession, "keyA", subject, email, x509.SHA384WithRSAPSS)
+	generateCSRLocal(t, operatorSession, "keyA", subject, email, x509.SHA512WithRSAPSS)
 	generateCSRLocal(t, operatorSession, "keyB", subject, email, x509.PureEd25519)
 	generateCSRLocal(t, operatorSession, "keyC", subject, email, x509.ECDSAWithSHA384)
 	generateCSRLocal(t, operatorSession, "keyD", subject, email, x509.ECDSAWithSHA512)
