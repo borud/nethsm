@@ -134,6 +134,34 @@ func (s *Session) GenerateCSR(keyID string, subject pkix.Name, email string) (st
 	return res, nil
 }
 
+// GenerateCSRUsingGoStdlib for key identified by keyID with subject and email. We return
+// the CSR as a string in PEM format since that is usually the most practical
+// format users of this library will be interested in.
+//
+// This variant uses the Go standard library to create the certificate request
+// rather than the CSR generation endpoint of the NetHSM.  This is due to certain
+// differences in
+func (s *Session) GenerateCSRUsingGoStdlib(keyID string, subject pkix.Name, email string, alg x509.SignatureAlgorithm) (string, error) {
+	hsmSigner := &Signer{
+		KeyID:              keyID,
+		SignatureAlgorithm: alg,
+		Session:            s,
+	}
+
+	csrTemplate := &x509.CertificateRequest{
+		Subject:            subject,
+		SignatureAlgorithm: alg,
+		EmailAddresses:     []string{email},
+	}
+
+	csrDER, err := x509.CreateCertificateRequest(nil, csrTemplate, hsmSigner)
+	if err != nil {
+		return "", fmt.Errorf("create certificate request error: %w", err)
+	}
+
+	return string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrDER})), nil
+}
+
 // Sign the digest using the key with id keyID using signing mode given by signMode.
 //
 // Valid values for signatureAlgorithm are:
@@ -201,10 +229,10 @@ func (s *Session) CreateCertificate(param CSRSigningParameters) (string, error) 
 		SignatureAlgorithm:    param.SignatureAlgorithm,
 	}
 
-	hsmSigner := &signer{
-		keyID:              param.SigningKeyID,
-		signatureAlgorithm: param.SignatureAlgorithm,
-		session:            s,
+	hsmSigner := &Signer{
+		KeyID:              param.SigningKeyID,
+		SignatureAlgorithm: param.SignatureAlgorithm,
+		Session:            s,
 	}
 
 	parent := &template

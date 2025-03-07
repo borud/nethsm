@@ -162,6 +162,12 @@ func TestSession(t *testing.T) {
 		TLSMode:  TLSModeSkipVerify,
 	}
 
+	// test local CSR generation.  Must be done by operator.
+	generateCSRLocal(t, operatorSession, "keyA", subject, email, x509.SHA384WithRSAPSS)
+	generateCSRLocal(t, operatorSession, "keyB", subject, email, x509.PureEd25519)
+	generateCSRLocal(t, operatorSession, "keyC", subject, email, x509.ECDSAWithSHA384)
+	generateCSRLocal(t, operatorSession, "keyD", subject, email, x509.ECDSAWithSHA512)
+
 	someData := []byte("This is some data that we want to sign")
 	digestA := sha512.Sum512(someData)
 	digestC := sha512.Sum384(someData)
@@ -398,6 +404,21 @@ func TestSession(t *testing.T) {
 
 func generateCSR(t *testing.T, session *Session, keyID string, subject pkix.Name, email string) string {
 	csrPEM, err := session.GenerateCSR(keyID, subject, email)
+	require.NoError(t, err)
+
+	block, _ := pem.Decode([]byte(csrPEM))
+	require.NotNil(t, block)
+	require.Equal(t, "CERTIFICATE REQUEST", block.Type)
+
+	csr, err := x509.ParseCertificateRequest(block.Bytes)
+	require.NoError(t, err)
+
+	require.NoError(t, csr.CheckSignature())
+	return csrPEM
+}
+
+func generateCSRLocal(t *testing.T, session *Session, keyID string, subject pkix.Name, email string, algo x509.SignatureAlgorithm) string {
+	csrPEM, err := session.GenerateCSRUsingGoStdlib(keyID, subject, email, algo)
 	require.NoError(t, err)
 
 	block, _ := pem.Decode([]byte(csrPEM))

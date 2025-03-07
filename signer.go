@@ -8,18 +8,18 @@ import (
 	"log/slog"
 )
 
-// signer provides a crypto.Signer interface.
-type signer struct {
-	keyID              string
-	signatureAlgorithm x509.SignatureAlgorithm
-	session            *Session
+// Signer provides a crypto.Signer interface.
+type Signer struct {
+	KeyID              string
+	SignatureAlgorithm x509.SignatureAlgorithm
+	Session            *Session
 }
 
 // Public returns the public key.
-func (h *signer) Public() crypto.PublicKey {
-	pub, err := h.session.GetPublicKey(h.keyID)
+func (h *Signer) Public() crypto.PublicKey {
+	pub, err := h.Session.GetPublicKey(h.KeyID)
 	if err != nil {
-		slog.Error("signer is unable to get public key", "keyID", h.keyID, "err", err)
+		slog.Error("signer is unable to get public key", "keyID", h.KeyID, "err", err)
 		return nil
 	}
 
@@ -27,16 +27,16 @@ func (h *signer) Public() crypto.PublicKey {
 }
 
 // Sign signs the digest.
-func (h *signer) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+func (h *Signer) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
 	// not sure if we need to deal with the opts so log it for now
 	slog.Debug("Signing operation",
-		"keyID", h.keyID,
-		"expectedHashFunc", h.signatureAlgorithm, // Log expected hash mode
+		"keyID", h.KeyID,
+		"expectedHashFunc", h.SignatureAlgorithm, // Log expected hash mode
 		"receivedHashFunc", opts.HashFunc().String(), // Log received hash mode
 		"digestSize", len(digest),
 	)
 
-	ret, err := h.session.Sign(h.keyID, h.signatureAlgorithm, digest)
+	ret, err := h.Session.Sign(h.KeyID, h.SignatureAlgorithm, digest)
 	if err != nil {
 		return nil, err
 	}
