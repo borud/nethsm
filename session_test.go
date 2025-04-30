@@ -10,6 +10,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path"
 	"testing"
@@ -309,6 +310,34 @@ func TestSession(t *testing.T) {
 	decryptedData2, err := operatorSession.DecryptSymmetric("key128", encryptedData2, initialVector)
 	require.NoError(t, err)
 	require.Equal(t, secretMessage, decryptedData2)
+
+	// Test that overriding the Subject works
+	//
+	csrSubjectOverrideKeyName := "csrSubjectOverrideKey"
+	require.NoError(t, session.GenerateKey(csrSubjectOverrideKeyName, api.KEYTYPE_EC_P384, []api.KeyMechanism{api.KEYMECHANISM_ECDSA_SIGNATURE}, 384))
+	// Generate CSR and check the result
+	overrideTestCSR := generateCSR(t, session, csrSubjectOverrideKeyName, pkix.Name{CommonName: "the CSR subject"}, "test@example.com")
+	overrideTestCert, err := operatorSession.CreateCertificate(CSRSigningParameters{
+		SelfSign:           false,
+		SignatureAlgorithm: x509.ECDSAWithSHA512,
+		SigningKeyID:       "keyD",
+		CSRPEM:             overrideTestCSR,
+		Subject:            &pkix.Name{CommonName: "overridden"},
+		KeyUsage:           x509.KeyUsageCRLSign | x509.KeyUsageCertSign,
+		NotBefore:          time.Now(),
+		NotAfter:           time.Now().Add(time.Hour),
+		IsCA:               false,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, overrideTestCert)
+
+	block, _ := pem.Decode([]byte(overrideTestCert))
+	cert, err := x509.ParseCertificate(block.Bytes)
+	require.NoError(t, err)
+
+	// Now make sure the subject was overridden.
+	require.Equal(t, "overridden", cert.Subject.CommonName)
+	slog.Info("subject override worked")
 
 	// Test using TLS certificate from NetHSM
 	tlsCertificate, err := session.GetTLSCertificate()

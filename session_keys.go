@@ -23,11 +23,14 @@ import (
 )
 
 // CSRSigningParameters are the signing parameters for signing a CSR.
+//
+// If the Subject is non-nil we override the Subject in the CSR when we create the certificate.
 type CSRSigningParameters struct {
 	SelfSign           bool
 	SignatureAlgorithm x509.SignatureAlgorithm
 	SigningKeyID       string
 	CSRPEM             string
+	Subject            *pkix.Name
 	KeyUsage           x509.KeyUsage
 	ExtKeyUsage        []x509.ExtKeyUsage
 	NotBefore          time.Time
@@ -215,9 +218,16 @@ func (s *Session) CreateCertificate(param CSRSigningParameters) (string, error) 
 		return "", err
 	}
 
+	// Per default we use the Subject from the CSR.  If the Subject in param is non-nil
+	// we override the subject given in the CSR.
+	subject := csr.Subject
+	if param.Subject != nil {
+		subject = *param.Subject
+	}
+
 	template := x509.Certificate{
 		SerialNumber:          serial,
-		Subject:               csr.Subject,
+		Subject:               subject,
 		NotBefore:             param.NotBefore,
 		NotAfter:              param.NotAfter,
 		KeyUsage:              param.KeyUsage,
