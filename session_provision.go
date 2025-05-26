@@ -15,12 +15,13 @@ func (s *Session) Provision(unlockPass string, adminPass string) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.ProvisionPost(ctx).
+	resp, err := client.ProvisionPost(ctx).
 		ProvisionRequestData(
 			*api.NewProvisionRequestData(
 				unlockPass,
 				adminPass,
 				time.Time{})).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return fmt.Errorf("failed to provision NetHSM [%s]: %w", s.APIURL, err)
 	}

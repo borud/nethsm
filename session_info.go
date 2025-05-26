@@ -9,9 +9,10 @@ func (s *Session) GetInfo() (*api.InfoData, error) {
 		return nil, err
 	}
 
-	res, _, err := client.InfoGet(ctx).Execute()
+	info, resp, err := client.InfoGet(ctx).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, err
 	}
-	return res, err
+	return info, err
 }

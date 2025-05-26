@@ -15,6 +15,7 @@ func (s *Session) Backup() (*os.File, error) {
 	}
 
 	f, res, err := client.SystemBackupPost(ctx).Execute()
+	defer closeBody(res)
 	if err != nil {
 		return nil, errors.Join(err, asError(res))
 	}
@@ -34,7 +35,7 @@ func (s *Session) Restore(backupPass string, backupFile *os.File) error {
 		}).
 		BackupFile(backupFile).
 		Execute()
-
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
@@ -53,6 +54,7 @@ func (s *Session) SetBackupPassword(newPass, currentPass string) error {
 		NewPassphrase:     newPass,
 		CurrentPassphrase: currentPass,
 	}).Execute()
+	defer closeBody(resp)
 
 	if err != nil {
 		return errors.Join(err, asError(resp))

@@ -62,6 +62,7 @@ func (s *Session) GenerateKey(keyID string, keyType api.KeyType, keyMechanisms [
 	}
 
 	_, resp, err := client.KeysGeneratePost(ctx).KeyGenerateRequestData(*requestData).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
@@ -76,6 +77,7 @@ func (s *Session) GetPublicKey(keyID string) (crypto.PublicKey, error) {
 	}
 
 	pub, resp, err := client.KeysKeyIDGet(ctx, keyID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, errors.Join(err, asError(resp))
 	}
@@ -91,6 +93,7 @@ func (s *Session) GetKey(keyID string) (*api.PublicKey, error) {
 	}
 
 	pub, resp, err := client.KeysKeyIDGet(ctx, keyID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, errors.Join(err, asError(resp))
 	}
@@ -106,6 +109,7 @@ func (s *Session) ListKeys() ([]string, error) {
 	}
 
 	keyItems, resp, err := client.KeysGet(ctx).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return []string{}, errors.Join(err, asError(resp))
 	}
@@ -131,6 +135,7 @@ func (s *Session) GenerateCSR(keyID string, subject pkix.Name, email string) (st
 	dn.EmailAddress = &email
 
 	res, resp, err := client.KeysKeyIDCsrPemPost(ctx, keyID).DistinguishedName(dn).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
 	}
@@ -197,6 +202,7 @@ func (s *Session) Sign(keyID string, signatureAlgorithm x509.SignatureAlgorithm,
 			Message: base64.StdEncoding.EncodeToString(digest),
 		}).
 		Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
 	}
@@ -296,6 +302,7 @@ func (s *Session) SetCertificate(keyID string, certPEM []byte) error {
 		return err
 	}
 	resp, err := client.KeysKeyIDCertPut(ctx, keyID).Body(r).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
@@ -311,6 +318,7 @@ func (s *Session) GetCertificate(keyID string) (string, error) {
 	}
 
 	file, resp, err := client.KeysKeyIDCertGet(ctx, keyID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
 	}
@@ -332,6 +340,7 @@ func (s *Session) DeleteKey(keyID string) error {
 	}
 
 	resp, err := client.KeysKeyIDDelete(ctx, keyID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
@@ -346,6 +355,7 @@ func (s *Session) DeleteCertificate(keyID string) error {
 	}
 
 	resp, err := client.KeysKeyIDCertDelete(ctx, keyID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
@@ -371,6 +381,7 @@ func (s *Session) EncryptSymmetric(keyID string, message []byte, initialVector [
 		Message: paddedMessage,
 		Iv:      &iv,
 	}).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, errors.Join(err, asError(resp))
 	}
@@ -403,6 +414,7 @@ func (s *Session) DecryptSymmetric(keyID string, encipheredMessage []byte, initi
 		Encrypted: base64.StdEncoding.EncodeToString(encipheredMessage),
 		Iv:        &iv,
 	}).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, errors.Join(err, asError(resp))
 	}

@@ -14,6 +14,7 @@ func (s *Session) GetTLSCertificate() (string, error) {
 	}
 
 	tlsCert, resp, err := client.ConfigTlsCertPemGet(ctx).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
 	}
@@ -32,6 +33,7 @@ func (s *Session) GenerateTLSKey(keyType api.TlsKeyType, length int32) error {
 		Type:   keyType,
 		Length: &length,
 	}).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
@@ -47,6 +49,7 @@ func (s *Session) GenerateTLSCSR(dn api.DistinguishedName) (string, error) {
 	}
 
 	csrPEM, resp, err := client.ConfigTlsCsrPemPost(ctx).DistinguishedName(dn).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
 	}
@@ -62,6 +65,7 @@ func (s *Session) SetTLSCertificate(pem string) error {
 	}
 
 	resp, err := client.ConfigTlsCertPemPut(ctx).Body(pem).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}

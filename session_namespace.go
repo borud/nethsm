@@ -11,7 +11,8 @@ func (s *Session) AddNamespace(name string) error {
 		return err
 	}
 
-	_, err = client.NamespacesNamespaceIDPut(ctx, name).Execute()
+	resp, err := client.NamespacesNamespaceIDPut(ctx, name).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return fmt.Errorf("failed to create namespace [%s]: %w", name, err)
 	}
@@ -25,7 +26,8 @@ func (s *Session) ListNamespaces() ([]string, error) {
 		return nil, err
 	}
 
-	namespaces, _, err := client.NamespacesGet(ctx).Execute()
+	namespaces, resp, err := client.NamespacesGet(ctx).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list namespaces: %w", err)
 	}
@@ -46,7 +48,8 @@ func (s *Session) DeleteNamespace(name string) error {
 		return err
 	}
 
-	_, err = client.NamespacesNamespaceIDDelete(ctx, name).Execute()
+	resp, err := client.NamespacesNamespaceIDDelete(ctx, name).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return fmt.Errorf("failed to delete namespace [%s]: %w", name, err)
 	}

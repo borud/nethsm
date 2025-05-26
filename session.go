@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/borud/tunnel"
 
@@ -57,8 +58,12 @@ func (s *Session) newClientAndContext() (*api.DefaultAPIService, context.Context
 	// Create the HTTP client depending on parameters
 	httpClient := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: s.tlsConfig(),
-			DialContext:     dialer,
+			TLSClientConfig:     s.tlsConfig(),
+			DialContext:         dialer,
+			DisableKeepAlives:   true,
+			MaxIdleConnsPerHost: 4,
+			MaxConnsPerHost:     4,
+			IdleConnTimeout:     15 * time.Second,
 		},
 	}
 

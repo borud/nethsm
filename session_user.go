@@ -23,6 +23,7 @@ func (s *Session) AddUser(userID string, realname string, role string, passphras
 
 	userPostData := api.NewUserPostData(realname, roleValue, passphrase)
 	resp, err := client.UsersUserIDPut(ctx, userID).UserPostData(*userPostData).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(ErrUserCreateFailed, asError(resp), err)
 	}
@@ -38,6 +39,7 @@ func (s *Session) GetUser(userID string) (*api.UserData, error) {
 	}
 
 	userData, resp, err := client.UsersUserIDGet(ctx, userID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return nil, errors.Join(ErrUserGetFailed, asError(resp), err)
 	}
@@ -53,6 +55,7 @@ func (s *Session) ListUsers() ([]string, error) {
 	}
 
 	users, resp, err := client.UsersGet(ctx).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return []string{}, errors.Join(ErrUsersListFailed, asError(resp), err)
 	}
@@ -73,6 +76,7 @@ func (s *Session) DeleteUser(userID string) error {
 	}
 
 	resp, err := client.UsersUserIDDelete(ctx, userID).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(ErrUserDeleteFailed, asError(resp))
 	}

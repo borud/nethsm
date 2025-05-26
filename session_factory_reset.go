@@ -10,6 +10,7 @@ func (s *Session) FactoryReset() error {
 	}
 
 	resp, err := client.SystemFactoryResetPost(ctx).Execute()
+	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))
 	}
