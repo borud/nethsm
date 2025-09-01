@@ -8,7 +8,6 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -63,60 +62,75 @@ func TestSession(t *testing.T) {
 	require.NoError(t, err)
 
 	// Provision the NetHSM
-	session.Provision(dh.UnlockPassword(), dh.AdminPassword())
+	slog.Info("Provisioning; this may take some time", "apiURL", dh.APIURL())
+	err = session.Provision(dh.UnlockPassword(), dh.AdminPassword())
+	require.NoError(t, err)
+	slog.Info("Provision succeeded")
 
 	// Test GetInfo
 	info, err := session.GetInfo()
 	require.NoError(t, err)
 	require.Equal(t, info.Product, "NetHSM")
 	require.Equal(t, info.Vendor, "Nitrokey GmbH")
+	slog.Info("GetInfo succeeded")
 
 	// Test GetUser
 	userData, err := session.GetUser("admin")
 	require.NoError(t, err)
 	require.Equal(t, userData.RealName, "admin")
 	require.Equal(t, userData.Role, api.USERROLE_ADMINISTRATOR)
+	slog.Info("GetUser succeeded")
 
 	// Test ListUsers
 	users, err := session.ListUsers()
 	require.NoError(t, err)
 	require.Len(t, users, 1)
+	slog.Info("ListUsers succeeded")
 
 	// Test adding users
 	require.NoError(t, session.AddUser("temporary", "The Temporary User", "Operator", "verysecret"))
+	slog.Info("AddUser succeeded")
 
 	// Test removing user
 	require.NoError(t, session.DeleteUser("temporary"))
+	slog.Info("DeleteUser succeeded")
 
 	// Test adding namespace
 	require.NoError(t, session.AddNamespace("tempo"))
+	slog.Info("AddNamespace succeeded")
 
 	// Test listing namespaces
 	namespaces, err := session.ListNamespaces()
 	require.NoError(t, err)
 	require.Len(t, namespaces, 1)
+	slog.Info("ListNamespaces succeeded")
 
 	// Test removing namespaces
 	require.NoError(t, session.DeleteNamespace("tempo"))
+	slog.Info("DeleteNamespace succeeded")
 
 	// Test generating a key
 	require.NoError(t, session.GenerateKey("keyA", api.KEYTYPE_RSA, []api.KeyMechanism{api.KEYMECHANISM_RSA_SIGNATURE_PSS_SHA512}, 2048))
 	require.NoError(t, session.GenerateKey("keyB", api.KEYTYPE_CURVE25519, []api.KeyMechanism{api.KEYMECHANISM_ED_DSA_SIGNATURE}, 2048))
 	require.NoError(t, session.GenerateKey("keyC", api.KEYTYPE_EC_P384, []api.KeyMechanism{api.KEYMECHANISM_ECDSA_SIGNATURE}, 384))
 	require.NoError(t, session.GenerateKey("keyD", api.KEYTYPE_EC_P521, []api.KeyMechanism{api.KEYMECHANISM_ECDSA_SIGNATURE}, 521))
+	slog.Info("GenerateKey succeeded")
 
 	// Make sure we can handle RSA public key
 	pubA, err := session.GetPublicKey("keyA")
 	require.NoError(t, err)
 	require.IsType(t, &rsa.PublicKey{}, pubA)
+	slog.Info("GetPublicKey succeeded")
 
 	_, err = session.GetKey("keyA")
 	require.NoError(t, err)
+	slog.Info("GetKey succeeded")
 
 	// Make sure we can handle ED25519 public key
 	pubB, err := session.GetPublicKey("keyB")
 	require.NoError(t, err)
 	require.IsType(t, ed25519.PublicKey{}, pubB)
+	slog.Info("GetPublicKey for ed25519 succeeded")
 
 	_, err = session.GetKey("keyB")
 	require.NoError(t, err)
@@ -125,6 +139,7 @@ func TestSession(t *testing.T) {
 	pubC, err := session.GetPublicKey("keyC")
 	require.NoError(t, err)
 	require.IsType(t, &ecdsa.PublicKey{}, pubC)
+	slog.Info("GetPublicKey for P_384 succeeded")
 
 	_, err = session.GetKey("keyC")
 	require.NoError(t, err)
@@ -133,6 +148,7 @@ func TestSession(t *testing.T) {
 	pubD, err := session.GetPublicKey("keyD")
 	require.NoError(t, err)
 	require.IsType(t, &ecdsa.PublicKey{}, pubD)
+	slog.Info("GetPublicKey for P_521 succeeded")
 
 	_, err = session.GetKey("keyD")
 	require.NoError(t, err)
@@ -212,10 +228,14 @@ func TestSession(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, keyACert)
+	slog.Info("CreateCertificate succeeded")
+
 	require.NoError(t, session.SetCertificate("keyA", []byte(keyACert)))
+	slog.Info("SetCertificate succeeded")
 
 	_, err = operatorSession.GetCertificate("keyA")
 	require.NoError(t, err)
+	slog.Info("GetCertificate succeeded")
 
 	// Self signing ED25519
 	keyBCert, err := operatorSession.CreateCertificate(CSRSigningParameters{
@@ -301,17 +321,21 @@ func TestSession(t *testing.T) {
 
 	encryptedData, err := operatorSession.EncryptSymmetric("key256", secretMessage, initialVector)
 	require.NoError(t, err)
+	slog.Info("EncryptSymmetric AES256 succeeded")
 
 	decryptedData, err := operatorSession.DecryptSymmetric("key256", encryptedData, initialVector)
 	require.NoError(t, err)
 	require.Equal(t, secretMessage, decryptedData)
+	slog.Info("DecryptSymmetric AES265 succeeded")
 
 	encryptedData2, err := operatorSession.EncryptSymmetric("key128", secretMessage, initialVector)
 	require.NoError(t, err)
+	slog.Info("EncryptSymmetric AES128 succeeded")
 
 	decryptedData2, err := operatorSession.DecryptSymmetric("key128", encryptedData2, initialVector)
 	require.NoError(t, err)
 	require.Equal(t, secretMessage, decryptedData2)
+	slog.Info("DecryptSymmetric AES128 succeeded")
 
 	// Test that overriding the Subject works
 	//
@@ -339,11 +363,12 @@ func TestSession(t *testing.T) {
 
 	// Now make sure the subject was overridden.
 	require.Equal(t, "overridden", cert.Subject.CommonName)
-	slog.Info("subject override worked")
+	slog.Info("Subject override succeeded")
 
 	// Test using TLS certificate from NetHSM
 	tlsCertificate, err := session.GetTLSCertificate()
 	require.NoError(t, err)
+	slog.Info("GetTLSCertificate succeeded")
 
 	tlsTestSession, err := NewSession(Config{
 		Username:          "admin",
@@ -368,6 +393,7 @@ func TestSession(t *testing.T) {
 	require.NoError(t, err)
 	_, err = bogusTLSTestSession.GetInfo()
 	require.ErrorIs(t, err, ErrTLSCertificateMismatch)
+	slog.Info("Bogus TLS Certificate detection succeeded")
 
 	// ====== Test backup
 
@@ -376,6 +402,7 @@ func TestSession(t *testing.T) {
 
 	// Set backup passphrase.
 	require.NoError(t, session.SetBackupPassword("backupPassword", ""))
+	slog.Info("SetBackupPassword succeeded")
 
 	// Create a session with the backup user.
 	backupSession, err := NewSession(Config{
@@ -398,6 +425,7 @@ func TestSession(t *testing.T) {
 	backup, err := io.ReadAll(f)
 	require.NoError(t, err)
 	require.NotEmpty(t, backup)
+	slog.Info("Backup succeeded")
 
 	// write the backup to temporary file
 	tempDir := t.TempDir()
@@ -423,6 +451,7 @@ func TestSession(t *testing.T) {
 
 	// Restore from the backup
 	require.NoError(t, restoreSession.Restore("backupPassword", backupFile))
+	slog.Info("Restore succeeded")
 
 	// Create an admin session on the restored instance.
 	restoredAdminSession, err := NewSession(Config{
@@ -435,13 +464,12 @@ func TestSession(t *testing.T) {
 
 	// Unlock the restored
 	require.NoError(t, restoredAdminSession.UnLock(dh.UnlockPassword()))
+	slog.Info("Unlock on restored HSM succeeded")
 
 	// List keys
 	keys, err := restoredAdminSession.ListKeys()
 	require.NoError(t, err)
 	require.NotEmpty(t, keys)
-
-	fmt.Println(keys)
 }
 
 func generateCSR(t *testing.T, session *Session, keyID string, subject pkix.Name, email string) string {
