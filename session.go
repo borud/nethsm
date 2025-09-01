@@ -25,12 +25,18 @@ func NewSession(config Config) (*Session, error) {
 	// Create the HTTP client depending on parameters
 	httpClient := &http.Client{
 		Transport: &http.Transport{
+			Proxy:               http.ProxyFromEnvironment,
 			TLSClientConfig:     config.tlsConfig(),
 			DialContext:         dialer,
 			DisableKeepAlives:   true,
-			MaxIdleConnsPerHost: 2,
-			MaxConnsPerHost:     4,
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 4,
+			MaxConnsPerHost:     10,
 			IdleConnTimeout:     15 * time.Second,
+
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 120 * time.Second, // some calls can take a long time
+			ResponseHeaderTimeout: 120 * time.Second, // some calls can take a long time
 		},
 	}
 
