@@ -8,12 +8,7 @@ import (
 
 // Lock the NetHSM
 func (s *Session) Lock() error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.LockPost(ctx).Execute()
+	resp, err := s.client.LockPost(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return fmt.Errorf("failed to lock NetHSM instance: %w", err)
@@ -23,12 +18,7 @@ func (s *Session) Lock() error {
 
 // UnLock the NetHSM
 func (s *Session) UnLock(unlockPassphrase string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.UnlockPost(ctx).
+	resp, err := s.client.UnlockPost(s.authCtx).
 		UnlockRequestData(*api.NewUnlockRequestData(unlockPassphrase)).
 		Execute()
 	defer closeBody(resp)

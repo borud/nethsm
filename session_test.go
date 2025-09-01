@@ -54,12 +54,13 @@ func TestSession(t *testing.T) {
 		require.NoError(t, dh.Shutdown())
 	})
 
-	session := &Session{
+	session, err := NewSession(Config{
 		Username: "admin",
 		Password: dh.AdminPassword(),
 		APIURL:   dh.APIURL(),
 		TLSMode:  TLSModeSkipVerify,
-	}
+	})
+	require.NoError(t, err)
 
 	// Provision the NetHSM
 	session.Provision(dh.UnlockPassword(), dh.AdminPassword())
@@ -156,12 +157,13 @@ func TestSession(t *testing.T) {
 	// For signing we need an operator user
 	require.NoError(t, session.AddUser("operator", "The Operator", "Operator", "verysecret"))
 
-	operatorSession := &Session{
+	operatorSession, err := NewSession(Config{
 		Username: "operator",
 		Password: "verysecret",
 		APIURL:   dh.APIURL(),
 		TLSMode:  TLSModeSkipVerify,
-	}
+	})
+	require.NoError(t, err)
 
 	// test local CSR generation.  Must be done by operator.
 	generateCSRLocal(t, operatorSession, "keyA", subject, email, x509.SHA512WithRSAPSS)
@@ -343,20 +345,28 @@ func TestSession(t *testing.T) {
 	tlsCertificate, err := session.GetTLSCertificate()
 	require.NoError(t, err)
 
-	tlsTestSession := &Session{
+	tlsTestSession, err := NewSession(Config{
 		Username:          "admin",
 		Password:          dh.AdminPassword(),
 		APIURL:            dh.APIURL(),
 		ServerCertificate: []byte(tlsCertificate),
 		TLSMode:           TLSModeWithoutSANCheck,
-	}
+	})
+	require.NoError(t, err)
 
 	_, err = tlsTestSession.GetInfo()
 	require.NoError(t, err)
 
 	// Now we modify the certificate and see if that triggers the correct error
-	tlsTestSession.ServerCertificate = bogusTLSCertificate
-	_, err = tlsTestSession.GetInfo()
+	bogusTLSTestSession, err := NewSession(Config{
+		Username:          "admin",
+		Password:          dh.AdminPassword(),
+		APIURL:            dh.APIURL(),
+		ServerCertificate: []byte(bogusTLSCertificate),
+		TLSMode:           TLSModeWithoutSANCheck,
+	})
+	require.NoError(t, err)
+	_, err = bogusTLSTestSession.GetInfo()
 	require.ErrorIs(t, err, ErrTLSCertificateMismatch)
 
 	// ====== Test backup
@@ -368,13 +378,14 @@ func TestSession(t *testing.T) {
 	require.NoError(t, session.SetBackupPassword("backupPassword", ""))
 
 	// Create a session with the backup user.
-	backupSession := &Session{
+	backupSession, err := NewSession(Config{
 		Username:          "backup",
 		Password:          "verysecret",
 		APIURL:            dh.APIURL(),
 		ServerCertificate: []byte(tlsCertificate),
 		TLSMode:           TLSModeWithoutSANCheck,
-	}
+	})
+	require.NoError(t, err)
 
 	// Perform backup
 	f, err := backupSession.Backup()
@@ -404,21 +415,23 @@ func TestSession(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create session on NetHSM
-	restoreSession := &Session{
+	restoreSession, err := NewSession(Config{
 		APIURL:  restoreDH.APIURL(),
 		TLSMode: TLSModeSkipVerify,
-	}
+	})
+	require.NoError(t, err)
 
 	// Restore from the backup
 	require.NoError(t, restoreSession.Restore("backupPassword", backupFile))
 
 	// Create an admin session on the restored instance.
-	restoredAdminSession := &Session{
+	restoredAdminSession, err := NewSession(Config{
 		Username: "admin",
 		Password: dh.AdminPassword(), // use admin password from the restored NetHSM
 		APIURL:   restoreDH.APIURL(),
 		TLSMode:  TLSModeSkipVerify,
-	}
+	})
+	require.NoError(t, err)
 
 	// Unlock the restored
 	require.NoError(t, restoredAdminSession.UnLock(dh.UnlockPassword()))

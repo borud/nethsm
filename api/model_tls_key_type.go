@@ -22,20 +22,24 @@ type TlsKeyType string
 const (
 	TLSKEYTYPE_RSA TlsKeyType = "RSA"
 	TLSKEYTYPE_CURVE25519 TlsKeyType = "Curve25519"
-	TLSKEYTYPE_EC_P224 TlsKeyType = "EC_P224"
 	TLSKEYTYPE_EC_P256 TlsKeyType = "EC_P256"
 	TLSKEYTYPE_EC_P384 TlsKeyType = "EC_P384"
 	TLSKEYTYPE_EC_P521 TlsKeyType = "EC_P521"
+	TLSKEYTYPE_BRAINPOOL_P256 TlsKeyType = "BrainpoolP256"
+	TLSKEYTYPE_BRAINPOOL_P384 TlsKeyType = "BrainpoolP384"
+	TLSKEYTYPE_BRAINPOOL_P512 TlsKeyType = "BrainpoolP512"
 )
 
 // All allowed values of TlsKeyType enum
 var AllowedTlsKeyTypeEnumValues = []TlsKeyType{
 	"RSA",
 	"Curve25519",
-	"EC_P224",
 	"EC_P256",
 	"EC_P384",
 	"EC_P521",
+	"BrainpoolP256",
+	"BrainpoolP384",
+	"BrainpoolP512",
 }
 
 func (v *TlsKeyType) UnmarshalJSON(src []byte) error {

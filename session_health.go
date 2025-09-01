@@ -8,12 +8,7 @@ import (
 
 // GetHealthState of the NetHSM
 func (s *Session) GetHealthState() (api.SystemState, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return "", err
-	}
-
-	healthState, resp, err := client.HealthStateGet(ctx).Execute()
+	healthState, resp, err := s.client.HealthStateGet(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return healthState.State, fmt.Errorf("failed to get health state: %w", err)
@@ -24,12 +19,7 @@ func (s *Session) GetHealthState() (api.SystemState, error) {
 
 // GetHealthReady returns true if the NetHSM is to accept traffic (implies "Operational" state)
 func (s *Session) GetHealthReady() (bool, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return false, err
-	}
-
-	resp, err := client.HealthReadyGet(ctx).Execute()
+	resp, err := s.client.HealthReadyGet(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		if resp.StatusCode == 412 {
@@ -48,12 +38,7 @@ func (s *Session) GetHealthReady() (bool, error) {
 // GetHealthAlive returns true if the NetHSM is alive, but not ready to accept
 // traffic (implies Locked or Unprovisioned)
 func (s *Session) GetHealthAlive() (bool, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return false, err
-	}
-
-	resp, err := client.HealthAliveGet(ctx).Execute()
+	resp, err := s.client.HealthAliveGet(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		if resp.StatusCode == 412 {

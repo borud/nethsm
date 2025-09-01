@@ -21,7 +21,7 @@ var _ MappedNullable = &UserItem{}
 
 // UserItem struct for UserItem
 type UserItem struct {
-	User string `json:"user" validate:"regexp=^([a-zA-Z0-9]+~)?[a-zA-Z0-9]+$"`
+	User string `json:"user" validate:"regexp=^([a-zA-Z0-9][a-zA-Z0-9_.-]*~)?[a-zA-Z0-9][a-zA-Z0-9_.-]*$"`
 }
 
 type _UserItem UserItem

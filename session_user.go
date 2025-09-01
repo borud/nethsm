@@ -11,18 +11,13 @@ import (
 //
 // TODO(borud): replace role string type with api.UserRole
 func (s *Session) AddUser(userID string, realname string, role string, passphrase string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
 	roleValue := api.UserRole(role)
 	if !roleValue.IsValid() {
 		return fmt.Errorf("invalid user role [%s], valid roles are: %v", role, api.AllowedUserRoleEnumValues)
 	}
 
 	userPostData := api.NewUserPostData(realname, roleValue, passphrase)
-	resp, err := client.UsersUserIDPut(ctx, userID).UserPostData(*userPostData).Execute()
+	resp, err := s.client.UsersUserIDPut(s.authCtx, userID).UserPostData(*userPostData).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(ErrUserCreateFailed, asError(resp), err)
@@ -33,12 +28,7 @@ func (s *Session) AddUser(userID string, realname string, role string, passphras
 
 // GetUser gets the user data for user identified by userID
 func (s *Session) GetUser(userID string) (*api.UserData, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return nil, err
-	}
-
-	userData, resp, err := client.UsersUserIDGet(ctx, userID).Execute()
+	userData, resp, err := s.client.UsersUserIDGet(s.authCtx, userID).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return nil, errors.Join(ErrUserGetFailed, asError(resp), err)
@@ -49,12 +39,7 @@ func (s *Session) GetUser(userID string) (*api.UserData, error) {
 
 // ListUsers lists usernames.  If the namespace is set it lists the users for that namespace.
 func (s *Session) ListUsers() ([]string, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return []string{}, err
-	}
-
-	users, resp, err := client.UsersGet(ctx).Execute()
+	users, resp, err := s.client.UsersGet(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return []string{}, errors.Join(ErrUsersListFailed, asError(resp), err)
@@ -70,12 +55,7 @@ func (s *Session) ListUsers() ([]string, error) {
 
 // DeleteUser deletes user identified by userID.
 func (s *Session) DeleteUser(userID string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.UsersUserIDDelete(ctx, userID).Execute()
+	resp, err := s.client.UsersUserIDDelete(s.authCtx, userID).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(ErrUserDeleteFailed, asError(resp))

@@ -26,6 +26,6 @@ func TestPKIXToDistinguishedName(t *testing.T) {
 	require.Equal(t, strings.Join([]string{"FOO", "BAR", "BAZ"}, dnSeparatorChar), *dn.OrganizationalUnitName)
 	require.Equal(t, "Trondheim", *dn.LocalityName)
 	require.Equal(t, "Trondelag", *dn.StateOrProvinceName)
-	require.Equal(t, "common name", *&dn.CommonName)
+	require.Equal(t, "common name", dn.CommonName)
 	fmt.Printf("%+v\n", dn)
 }
