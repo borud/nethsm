@@ -6,12 +6,7 @@ import (
 
 // AddNamespace creates a namespace identified by name
 func (s *Session) AddNamespace(name string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.NamespacesNamespaceIDPut(ctx, name).Execute()
+	resp, err := s.client.NamespacesNamespaceIDPut(s.authCtx, name).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return fmt.Errorf("failed to create namespace [%s]: %w", name, err)
@@ -21,12 +16,7 @@ func (s *Session) AddNamespace(name string) error {
 
 // ListNamespaces lists the available namespaces
 func (s *Session) ListNamespaces() ([]string, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces, resp, err := client.NamespacesGet(ctx).Execute()
+	namespaces, resp, err := s.client.NamespacesGet(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list namespaces: %w", err)
@@ -43,12 +33,7 @@ func (s *Session) ListNamespaces() ([]string, error) {
 
 // DeleteNamespace removes a namespace identified by name.
 func (s *Session) DeleteNamespace(name string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.NamespacesNamespaceIDDelete(ctx, name).Execute()
+	resp, err := s.client.NamespacesNamespaceIDDelete(s.authCtx, name).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return fmt.Errorf("failed to delete namespace [%s]: %w", name, err)

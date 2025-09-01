@@ -9,12 +9,7 @@ import (
 
 // Backup initiates backup.
 func (s *Session) Backup() (*os.File, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return nil, err
-	}
-
-	f, res, err := client.SystemBackupPost(ctx).Execute()
+	f, res, err := s.client.SystemBackupPost(s.authCtx).Execute()
 	defer closeBody(res)
 	if err != nil {
 		return nil, errors.Join(err, asError(res))
@@ -24,12 +19,7 @@ func (s *Session) Backup() (*os.File, error) {
 
 // Restore backup from file.
 func (s *Session) Restore(backupPass string, backupFile *os.File) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.SystemRestorePost(ctx).
+	resp, err := s.client.SystemRestorePost(s.authCtx).
 		Arguments(api.RestoreRequestArguments{
 			BackupPassphrase: &backupPass,
 		}).
@@ -45,12 +35,7 @@ func (s *Session) Restore(backupPass string, backupFile *os.File) error {
 // SetBackupPassword sets the backup password.  If no password was set then
 // provide the empty string for currentPass.
 func (s *Session) SetBackupPassword(newPass, currentPass string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.ConfigBackupPassphrasePut(ctx).BackupPassphraseConfig(api.BackupPassphraseConfig{
+	resp, err := s.client.ConfigBackupPassphrasePut(s.authCtx).BackupPassphraseConfig(api.BackupPassphraseConfig{
 		NewPassphrase:     newPass,
 		CurrentPassphrase: currentPass,
 	}).Execute()

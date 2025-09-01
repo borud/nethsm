@@ -20,9 +20,6 @@ func decodePublicKey(pub *api.PublicKey) (crypto.PublicKey, error) {
 	case api.KEYTYPE_CURVE25519:
 		return decodeEDPublicKey(pub)
 
-	case api.KEYTYPE_EC_P224:
-		return decodeECPublicKey(pub)
-
 	case api.KEYTYPE_EC_P256:
 		return decodeECPublicKey(pub)
 
@@ -115,8 +112,6 @@ func decodeECPublicKey(pub *api.PublicKey) (*ecdsa.PublicKey, error) {
 
 	var curve elliptic.Curve
 	switch pub.Type {
-	case api.KEYTYPE_EC_P224:
-		curve = elliptic.P224()
 	case api.KEYTYPE_EC_P256:
 		curve = elliptic.P256()
 	case api.KEYTYPE_EC_P384:

@@ -2181,6 +2181,12 @@ func (a *DefaultAPIService) KeysKeyIDCertDeleteExecute(r ApiKeysKeyIDCertDeleteR
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -2276,6 +2282,12 @@ func (a *DefaultAPIService) KeysKeyIDCertGetExecute(r ApiKeysKeyIDCertGetRequest
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -2386,6 +2398,12 @@ func (a *DefaultAPIService) KeysKeyIDCertPutExecute(r ApiKeysKeyIDCertPutRequest
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return nil, reportError("keyID must have less than 128 elements")
+	}
 	if r.body == nil {
 		return nil, reportError("body is required and must be specified")
 	}
@@ -2491,6 +2509,12 @@ func (a *DefaultAPIService) KeysKeyIDCsrPemPostExecute(r ApiKeysKeyIDCsrPemPostR
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 	if r.distinguishedName == nil {
 		return localVarReturnValue, nil, reportError("distinguishedName is required and must be specified")
 	}
@@ -2606,6 +2630,12 @@ func (a *DefaultAPIService) KeysKeyIDDecryptPostExecute(r ApiKeysKeyIDDecryptPos
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 	if r.decryptRequestData == nil {
 		return localVarReturnValue, nil, reportError("decryptRequestData is required and must be specified")
 	}
@@ -2712,6 +2742,12 @@ func (a *DefaultAPIService) KeysKeyIDDeleteExecute(r ApiKeysKeyIDDeleteRequest) 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -2812,6 +2848,12 @@ func (a *DefaultAPIService) KeysKeyIDEncryptPostExecute(r ApiKeysKeyIDEncryptPos
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 	if r.encryptRequestData == nil {
 		return localVarReturnValue, nil, reportError("encryptRequestData is required and must be specified")
 	}
@@ -2920,6 +2962,12 @@ func (a *DefaultAPIService) KeysKeyIDGetExecute(r ApiKeysKeyIDGetRequest) (*Publ
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -3023,6 +3071,12 @@ func (a *DefaultAPIService) KeysKeyIDPublicPemGetExecute(r ApiKeysKeyIDPublicPem
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -3085,7 +3139,7 @@ type ApiKeysKeyIDPutRequest struct {
 	privateKey *PrivateKey
 }
 
-// For request body with content type &#x60;application/json&#x60;: * *RSA* includes &#x60;primeP&#x60;, &#x60;primeQ&#x60;, and &#x60;publicExponent&#x60; properties.   The remaining properties &#x60;privateExponent&#x60;, &#x60;modulus&#x60;, ..) are computed. * *EC_P224*, *EC_P256*, *EC_P384*, *EC_P521* uses the &#x60;data&#x60; property.   Keys are the raw (big endian) scalar. * *Curve25519* uses the &#x60;data&#x60; property.   Keys are the raw (little endian) key. 
+// For request body with content type &#x60;application/json&#x60;: * *RSA* includes &#x60;primeP&#x60;, &#x60;primeQ&#x60;, and &#x60;publicExponent&#x60; properties.   The remaining properties &#x60;privateExponent&#x60;, &#x60;modulus&#x60;, ..) are computed. * *EC_P256*, *EC_P384*, *EC_P521* uses the &#x60;data&#x60; property.   Keys are the raw (big endian) scalar. * *Curve25519* uses the &#x60;data&#x60; property.   Keys are the raw (little endian) key. 
 func (r ApiKeysKeyIDPutRequest) PrivateKey(privateKey PrivateKey) ApiKeysKeyIDPutRequest {
 	r.privateKey = &privateKey
 	return r
@@ -3135,6 +3189,12 @@ func (a *DefaultAPIService) KeysKeyIDPutExecute(r ApiKeysKeyIDPutRequest) (*http
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return nil, reportError("keyID must have less than 128 elements")
+	}
 	if r.privateKey == nil {
 		return nil, reportError("privateKey is required and must be specified")
 	}
@@ -3236,6 +3296,12 @@ func (a *DefaultAPIService) KeysKeyIDRestrictionsTagsTagDeleteExecute(r ApiKeysK
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -3332,6 +3398,12 @@ func (a *DefaultAPIService) KeysKeyIDRestrictionsTagsTagPutExecute(r ApiKeysKeyI
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return nil, reportError("keyID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -3385,7 +3457,7 @@ type ApiKeysKeyIDSignPostRequest struct {
 	signRequestData *SignRequestData
 }
 
-// For request body with content type &#x60;application/json&#x60;: * Mode &#x60;PKCS1&#x60; expects the already hashed data. * Mode &#x60;PSS_*&#x60; expects the already hashed data. * Mode &#x60;EdDSA&#x60; expects the raw message   (ED25519 applies the SHA512 hash internally,   also to derive the nonce). * Mode &#x60;ECDSA&#x60; expects the hashed data   (using SHA224 for P224, SHA256 for P256,   SHA384 for P384 and SHA512 for P521). 
+// For request body with content type &#x60;application/json&#x60;: * Mode &#x60;PKCS1&#x60; expects the already hashed data. * Mode &#x60;PSS_*&#x60; expects the already hashed data. * Mode &#x60;EdDSA&#x60; expects any message   (ED25519 applies the SHA512 hash internally,   also to derive the nonce). * Mode &#x60;ECDSA&#x60; expects the hashed data   (using SHA256 for P256,   SHA384 for P384 and SHA512 for P521). * Mode &#x60;BIP340&#x60; expects any message   (BIP-340 applies the tagged SHA256 hash internally). 
 func (r ApiKeysKeyIDSignPostRequest) SignRequestData(signRequestData SignRequestData) ApiKeysKeyIDSignPostRequest {
 	r.signRequestData = &signRequestData
 	return r
@@ -3433,6 +3505,12 @@ func (a *DefaultAPIService) KeysKeyIDSignPostExecute(r ApiKeysKeyIDSignPostReque
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.keyID) < 1 {
+		return localVarReturnValue, nil, reportError("keyID must have at least 1 elements")
+	}
+	if strlen(r.keyID) > 128 {
+		return localVarReturnValue, nil, reportError("keyID must have less than 128 elements")
+	}
 	if r.signRequestData == nil {
 		return localVarReturnValue, nil, reportError("signRequestData is required and must be specified")
 	}
@@ -3943,6 +4021,12 @@ func (a *DefaultAPIService) NamespacesNamespaceIDDeleteExecute(r ApiNamespacesNa
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.namespaceID) < 1 {
+		return nil, reportError("namespaceID must have at least 1 elements")
+	}
+	if strlen(r.namespaceID) > 128 {
+		return nil, reportError("namespaceID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -4037,6 +4121,12 @@ func (a *DefaultAPIService) NamespacesNamespaceIDPutExecute(r ApiNamespacesNames
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if strlen(r.namespaceID) < 1 {
+		return nil, reportError("namespaceID must have at least 1 elements")
+	}
+	if strlen(r.namespaceID) > 128 {
+		return nil, reportError("namespaceID must have less than 128 elements")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -4986,6 +5076,11 @@ func (r ApiSystemShutdownPostRequest) Execute() (*http.Response, error) {
 SystemShutdownPost Method for SystemShutdownPost
 
 Shut down NetHSM.
+
+Authentication behavior varies by NetHSM state:
+- **Operational**: Requires Administrator authentication
+- **Locked** or **Unprovisioned**: No authentication required
+
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiSystemShutdownPostRequest

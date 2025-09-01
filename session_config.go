@@ -8,12 +8,7 @@ import (
 
 // GetTLSCertificate retrieves the TLS Certificate for the NetHSM.
 func (s *Session) GetTLSCertificate() (string, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return "", err
-	}
-
-	tlsCert, resp, err := client.ConfigTlsCertPemGet(ctx).Execute()
+	tlsCert, resp, err := s.client.ConfigTlsCertPemGet(s.authCtx).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
@@ -24,12 +19,7 @@ func (s *Session) GetTLSCertificate() (string, error) {
 
 // GenerateTLSKey generates a TLS key for the NetHSM.
 func (s *Session) GenerateTLSKey(keyType api.TlsKeyType, length int32) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.ConfigTlsGeneratePost(ctx).TlsKeyGenerateRequestData(api.TlsKeyGenerateRequestData{
+	resp, err := s.client.ConfigTlsGeneratePost(s.authCtx).TlsKeyGenerateRequestData(api.TlsKeyGenerateRequestData{
 		Type:   keyType,
 		Length: &length,
 	}).Execute()
@@ -43,12 +33,7 @@ func (s *Session) GenerateTLSKey(keyType api.TlsKeyType, length int32) error {
 
 // GenerateTLSCSR generates a certificate signing request for the TLS key.
 func (s *Session) GenerateTLSCSR(dn api.DistinguishedName) (string, error) {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return "", err
-	}
-
-	csrPEM, resp, err := client.ConfigTlsCsrPemPost(ctx).DistinguishedName(dn).Execute()
+	csrPEM, resp, err := s.client.ConfigTlsCsrPemPost(s.authCtx).DistinguishedName(dn).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
@@ -59,12 +44,7 @@ func (s *Session) GenerateTLSCSR(dn api.DistinguishedName) (string, error) {
 
 // SetTLSCertificate sets the TLS certificate for the NetHSM.
 func (s *Session) SetTLSCertificate(pem string) error {
-	client, ctx, err := s.newClientAndContext()
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.ConfigTlsCertPemPut(ctx).Body(pem).Execute()
+	resp, err := s.client.ConfigTlsCertPemPut(s.authCtx).Body(pem).Execute()
 	defer closeBody(resp)
 	if err != nil {
 		return errors.Join(err, asError(resp))

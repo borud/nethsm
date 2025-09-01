@@ -29,6 +29,7 @@ const (
 	SIGNMODE_PSS_SHA512 SignMode = "PSS_SHA512"
 	SIGNMODE_ED_DSA SignMode = "EdDSA"
 	SIGNMODE_ECDSA SignMode = "ECDSA"
+	SIGNMODE_BIP340 SignMode = "BIP340"
 )
 
 // All allowed values of SignMode enum
@@ -42,6 +43,7 @@ var AllowedSignModeEnumValues = []SignMode{
 	"PSS_SHA512",
 	"EdDSA",
 	"ECDSA",
+	"BIP340",
 }
 
 func (v *SignMode) UnmarshalJSON(src []byte) error {

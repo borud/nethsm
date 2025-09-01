@@ -37,6 +37,7 @@ const (
 	KEYMECHANISM_RSA_SIGNATURE_PSS_SHA512 KeyMechanism = "RSA_Signature_PSS_SHA512"
 	KEYMECHANISM_ED_DSA_SIGNATURE KeyMechanism = "EdDSA_Signature"
 	KEYMECHANISM_ECDSA_SIGNATURE KeyMechanism = "ECDSA_Signature"
+	KEYMECHANISM_BIP340_SIGNATURE KeyMechanism = "BIP340_Signature"
 	KEYMECHANISM_AES_ENCRYPTION_CBC KeyMechanism = "AES_Encryption_CBC"
 	KEYMECHANISM_AES_DECRYPTION_CBC KeyMechanism = "AES_Decryption_CBC"
 )
@@ -60,6 +61,7 @@ var AllowedKeyMechanismEnumValues = []KeyMechanism{
 	"RSA_Signature_PSS_SHA512",
 	"EdDSA_Signature",
 	"ECDSA_Signature",
+	"BIP340_Signature",
 	"AES_Encryption_CBC",
 	"AES_Decryption_CBC",
 }

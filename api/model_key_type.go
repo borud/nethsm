@@ -22,10 +22,13 @@ type KeyType string
 const (
 	KEYTYPE_RSA KeyType = "RSA"
 	KEYTYPE_CURVE25519 KeyType = "Curve25519"
-	KEYTYPE_EC_P224 KeyType = "EC_P224"
 	KEYTYPE_EC_P256 KeyType = "EC_P256"
 	KEYTYPE_EC_P384 KeyType = "EC_P384"
 	KEYTYPE_EC_P521 KeyType = "EC_P521"
+	KEYTYPE_EC_P256_K1 KeyType = "EC_P256K1"
+	KEYTYPE_BRAINPOOL_P256 KeyType = "BrainpoolP256"
+	KEYTYPE_BRAINPOOL_P384 KeyType = "BrainpoolP384"
+	KEYTYPE_BRAINPOOL_P512 KeyType = "BrainpoolP512"
 	KEYTYPE_GENERIC KeyType = "Generic"
 )
 
@@ -33,10 +36,13 @@ const (
 var AllowedKeyTypeEnumValues = []KeyType{
 	"RSA",
 	"Curve25519",
-	"EC_P224",
 	"EC_P256",
 	"EC_P384",
 	"EC_P521",
+	"EC_P256K1",
+	"BrainpoolP256",
+	"BrainpoolP384",
+	"BrainpoolP512",
 	"Generic",
 }
 

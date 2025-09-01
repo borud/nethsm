@@ -21,7 +21,7 @@ var _ MappedNullable = &KeyItem{}
 
 // KeyItem struct for KeyItem
 type KeyItem struct {
-	Id string `json:"id" validate:"regexp=^[a-zA-Z0-9]+$"`
+	Id string `json:"id" validate:"regexp=^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"`
 }
 
 type _KeyItem KeyItem

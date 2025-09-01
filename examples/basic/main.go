@@ -3,6 +3,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 
 	"github.com/borud/nethsm"
 	"github.com/borud/nethsm/api"
@@ -10,11 +11,15 @@ import (
 
 func main() {
 	// Create a session
-	session := nethsm.Session{
+	session, err := nethsm.NewSession(nethsm.Config{
 		Username: "admin",
 		Password: "verysecret",
 		APIURL:   "https://127.0.0.1:8443/api/v1",
 		TLSMode:  nethsm.TLSModeSkipVerify,
+	})
+	if err != nil {
+		slog.Error("error creating new session", "err", err)
+		os.Exit(1)
 	}
 
 	// Get information about vendor and product

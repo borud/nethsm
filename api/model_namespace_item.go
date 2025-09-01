@@ -21,7 +21,7 @@ var _ MappedNullable = &NamespaceItem{}
 
 // NamespaceItem struct for NamespaceItem
 type NamespaceItem struct {
-	Id string `json:"id" validate:"regexp=^[a-zA-Z0-9]+$"`
+	Id string `json:"id" validate:"regexp=^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"`
 }
 
 type _NamespaceItem NamespaceItem

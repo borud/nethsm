@@ -24,7 +24,7 @@ type KeyGenerateRequestData struct {
 	Mechanisms []KeyMechanism `json:"mechanisms"`
 	Type KeyType `json:"type"`
 	Length *int32 `json:"length,omitempty"`
-	Id *string `json:"id,omitempty" validate:"regexp=^[a-zA-Z0-9]+$"`
+	Id *string `json:"id,omitempty" validate:"regexp=^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"`
 	Restrictions *KeyRestrictions `json:"restrictions,omitempty"`
 }
 
