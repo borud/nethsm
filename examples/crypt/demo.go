@@ -97,15 +97,15 @@ func (d *demo) messageRaw() error {
 	k := (n.BitLen() + 7) / 8
 	ciphertext := leftPad(c.Bytes(), k)
 
-	clear, err := d.operatorSession.Decrypt(d.keyName, api.DECRYPTMODE_RAW, ciphertext)
+	clearText, err := d.operatorSession.Decrypt(d.keyName, api.DECRYPTMODE_RAW, ciphertext)
 	if err != nil {
 		return fmt.Errorf("decrypt RAW: %w", err)
 	}
 
 	// RAW decrypt returns the full k-byte integer; trim leading zeros before compare.
-	clear = bytes.TrimLeft(clear, "\x00")
-	if !bytes.Equal(clear, plaintext) {
-		return fmt.Errorf("RAW round-trip mismatch: got %q want %q", string(clear), string(plaintext))
+	clearText = bytes.TrimLeft(clearText, "\x00")
+	if !bytes.Equal(clearText, plaintext) {
+		return fmt.Errorf("RAW round-trip mismatch: got %q want %q", string(clearText), string(plaintext))
 	}
 	slog.Info("  RAW: round-trip OK")
 	return nil
@@ -124,12 +124,12 @@ func (d *demo) messagePKCS1() error {
 		return fmt.Errorf("EncryptPKCS1v15: %w", err)
 	}
 
-	clear, err := d.operatorSession.Decrypt(d.getKeyName(), api.DECRYPTMODE_PKCS1, ciphertext)
+	clearText, err := d.operatorSession.Decrypt(d.getKeyName(), api.DECRYPTMODE_PKCS1, ciphertext)
 	if err != nil {
 		return fmt.Errorf("decrypt PKCS1: %w", err)
 	}
-	if !bytes.Equal(clear, plaintext) {
-		return fmt.Errorf("PKCS1 round-trip mismatch: got %q want %q", string(clear), string(plaintext))
+	if !bytes.Equal(clearText, plaintext) {
+		return fmt.Errorf("PKCS1 round-trip mismatch: got %q want %q", string(clearText), string(plaintext))
 	}
 	slog.Info("  PKCS1: round-trip OK")
 	return nil
@@ -150,12 +150,12 @@ func (d *demo) messageOAEP() error {
 		return fmt.Errorf("EncryptOAEP(SHA-256): %w", err)
 	}
 
-	clear, err := d.operatorSession.Decrypt(d.getKeyName(), api.DECRYPTMODE_OAEP_SHA256, ciphertext)
+	clearText, err := d.operatorSession.Decrypt(d.getKeyName(), api.DECRYPTMODE_OAEP_SHA256, ciphertext)
 	if err != nil {
 		return fmt.Errorf("decrypt OAEP-SHA256: %w", err)
 	}
-	if !bytes.Equal(clear, plaintext) {
-		return fmt.Errorf("OAEP-SHA256 round-trip mismatch: got %q want %q", string(clear), string(plaintext))
+	if !bytes.Equal(clearText, plaintext) {
+		return fmt.Errorf("OAEP-SHA256 round-trip mismatch: got %q want %q", string(clearText), string(plaintext))
 	}
 	slog.Info("  OAEP-SHA256: round-trip OK")
 	return nil

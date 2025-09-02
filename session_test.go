@@ -3,6 +3,7 @@ package nethsm
 import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha512"
 	"crypto/x509"
@@ -38,6 +39,10 @@ pAqEAuV4DNoxQKKWmhVv+J0ptMWD25Pnpxeq5sXzghfJnslJlQND
 -----END CERTIFICATE-----`)
 )
 
+// TestSession tests everything.
+//
+// TODO(borud): This test is awfully long and ugly.  Rewrite it and chop it
+// into managable pieces.
 func TestSession(t *testing.T) {
 	if os.Getenv("TEST_TAG") != "slowtest" {
 		t.Skip("Skipping test because TEST_TAG is not set to slowtest")
@@ -394,6 +399,35 @@ func TestSession(t *testing.T) {
 	_, err = bogusTLSTestSession.GetInfo()
 	require.ErrorIs(t, err, ErrTLSCertificateMismatch)
 	slog.Info("Bogus TLS Certificate detection succeeded")
+
+	// ====== Encryption and decryption
+
+	rsaDecryptTestKeyName := "rsaDecryptTestKey"
+	require.NoError(t, session.GenerateKey(
+		rsaDecryptTestKeyName,
+		api.KEYTYPE_RSA,
+		[]api.KeyMechanism{
+			api.KEYMECHANISM_RSA_DECRYPTION_RAW,
+			api.KEYMECHANISM_RSA_DECRYPTION_PKCS1,
+			api.KEYMECHANISM_RSA_DECRYPTION_OAEP_SHA256,
+		},
+		2048))
+
+	pubKeyTemp, err := operatorSession.GetPublicKey(rsaDecryptTestKeyName)
+	require.NoError(t, err)
+
+	pubKey, ok := pubKeyTemp.(*rsa.PublicKey)
+	require.True(t, ok, "not an RSA key")
+
+	plainText := []byte("hello from PKCS#1 v1.5")
+	ciphertext, err := rsa.EncryptPKCS1v15(rand.Reader, pubKey, plainText)
+	require.NoError(t, err)
+
+	clearText, err := operatorSession.Decrypt(rsaDecryptTestKeyName, api.DECRYPTMODE_PKCS1, ciphertext)
+	require.NoError(t, err)
+	require.Equal(t, clearText, plainText)
+
+	slog.Info("Decrypt successful (PKCS1 round-trip OK)")
 
 	// ====== Test backup
 
