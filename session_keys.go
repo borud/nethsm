@@ -374,6 +374,10 @@ func (s *Session) DecryptSymmetric(keyID string, encipheredMessage []byte, initi
 
 // Decrypt ciphertext with key identified by keyID using the specified mode.
 func (s *Session) Decrypt(keyID string, mode api.DecryptMode, ciphertext []byte) ([]byte, error) {
+	if mode == api.DECRYPTMODE_AES_CBC {
+		return nil, fmt.Errorf("does not support DECRYPTMODE_AES_CBC, please use DecryptSymmetric for AES")
+	}
+
 	data, resp, err := s.client.KeysKeyIDDecryptPost(s.authCtx, keyID).DecryptRequestData(api.DecryptRequestData{
 		Mode:      mode,
 		Encrypted: base64.StdEncoding.EncodeToString(ciphertext),
