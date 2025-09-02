@@ -371,3 +371,27 @@ func (s *Session) DecryptSymmetric(keyID string, encipheredMessage []byte, initi
 
 	return unpadded, nil
 }
+
+// Decrypt ciphertext with key identified by keyID using the specified mode.
+func (s *Session) Decrypt(keyID string, mode api.DecryptMode, ciphertext []byte) ([]byte, error) {
+	data, resp, err := s.client.KeysKeyIDDecryptPost(s.authCtx, keyID).DecryptRequestData(api.DecryptRequestData{
+		Mode:      mode,
+		Encrypted: base64.StdEncoding.EncodeToString(ciphertext),
+	}).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return nil, errors.Join(err, asError(resp))
+	}
+
+	decrypted, ok := data.GetDecryptedOk()
+	if !ok {
+		return nil, ErrCleartextEmpty
+	}
+
+	cleartext, err := base64.StdEncoding.DecodeString(*decrypted)
+	if err != nil {
+		return nil, errors.Join(ErrBase64Decode, err)
+	}
+
+	return cleartext, nil
+}

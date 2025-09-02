@@ -38,6 +38,7 @@ var (
 	ErrUserGetFailed           = errors.New("failed to get user")
 	ErrUserDeleteFailed        = errors.New("failed to delete user")
 	ErrUsersListFailed         = errors.New("failed to list users")
+	ErrCleartextEmpty          = errors.New("cleartext is empty")
 )
 
 // asError takes a pointer to an http.Response and returns an error type.
