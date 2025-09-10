@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log/slog"
 	"net"
+	"time"
 
 	"github.com/borud/tunnel"
 )
@@ -26,6 +27,14 @@ type Config struct {
 	// SSHTunnel is a list of hops on the form <username>@<host>:<sshport> to allow
 	// for tunneling through intermediate hosts
 	SSHTunnel []string
+
+	DisableKeepAlives     bool
+	MaxIdleConns          int
+	MaxIdleConnsPerHost   int
+	IdleConnTimeout       time.Duration
+	TLSHandshakeTimeout   time.Duration
+	ExpectContinueTimeout time.Duration
+	ResponseHeaderTimeout time.Duration
 }
 
 // TLSMode specifies what TLS checking we are going to do.
@@ -42,6 +51,15 @@ const (
 	// ServerCertificate checks out, but makes no further verifications. This
 	// is used to get around missing SAN fields.
 	TLSModeWithoutSANCheck
+)
+
+const (
+	defaultMaxIdleConns          = 10
+	defaultMaxIdleConnsPerHost   = 5
+	defaultIdleConnTimeout       = 30 * time.Second
+	defaultTLSHandshakeTimeout   = 30 * time.Second
+	defaultExpectContinueTimeout = 120 * time.Second // some calls can take a long time
+	defaultResponseHeaderTimeout = 120 * time.Second // some calls can take a long time
 )
 
 // newDialContextFunc returns a newDialContextFunc if we have defined an SSH tunnel and nil otherwise.

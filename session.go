@@ -3,7 +3,6 @@ package nethsm
 import (
 	"context"
 	"net/http"
-	"time"
 
 	api "github.com/borud/nethsm/api"
 )
@@ -17,6 +16,30 @@ type Session struct {
 
 // NewSession creates a news session.
 func NewSession(config Config) (*Session, error) {
+	if config.MaxIdleConns == 0 {
+		config.MaxIdleConns = defaultMaxIdleConns
+	}
+
+	if config.MaxIdleConnsPerHost == 0 {
+		config.MaxIdleConnsPerHost = defaultMaxIdleConnsPerHost
+	}
+
+	if config.IdleConnTimeout == 0 {
+		config.IdleConnTimeout = defaultIdleConnTimeout
+	}
+
+	if config.TLSHandshakeTimeout == 0 {
+		config.TLSHandshakeTimeout = defaultTLSHandshakeTimeout
+	}
+
+	if config.ExpectContinueTimeout == 0 {
+		config.ExpectContinueTimeout = defaultExpectContinueTimeout
+	}
+
+	if config.ResponseHeaderTimeout == 0 {
+		config.ResponseHeaderTimeout = defaultResponseHeaderTimeout
+	}
+
 	dialer, err := config.newDialContextFunc()
 	if err != nil {
 		return nil, err
@@ -28,15 +51,15 @@ func NewSession(config Config) (*Session, error) {
 			Proxy:               http.ProxyFromEnvironment,
 			TLSClientConfig:     config.tlsConfig(),
 			DialContext:         dialer,
-			DisableKeepAlives:   true,
-			MaxIdleConns:        100,
-			MaxIdleConnsPerHost: 4,
-			MaxConnsPerHost:     10,
-			IdleConnTimeout:     15 * time.Second,
+			DisableKeepAlives:   config.DisableKeepAlives,
+			MaxIdleConns:        config.MaxIdleConns,
+			MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
+			MaxConnsPerHost:     config.MaxIdleConns,
+			IdleConnTimeout:     config.IdleConnTimeout,
 
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 120 * time.Second, // some calls can take a long time
-			ResponseHeaderTimeout: 120 * time.Second, // some calls can take a long time
+			TLSHandshakeTimeout:   config.TLSHandshakeTimeout,
+			ExpectContinueTimeout: config.ExpectContinueTimeout,
+			ResponseHeaderTimeout: config.ResponseHeaderTimeout,
 		},
 	}
 
