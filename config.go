@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/borud/tunnel"
+	"golang.org/x/crypto/ssh"
 )
 
 // Config for NetHSM session.
@@ -24,9 +25,6 @@ type Config struct {
 	ServerCertificate []byte
 	// TLSMode sets how we verify the server certificate
 	TLSMode TLSMode
-	// SSHTunnel is a list of hops on the form <username>@<host>:<sshport> to allow
-	// for tunneling through intermediate hosts
-	SSHTunnel []string
 
 	DisableKeepAlives     bool
 	MaxIdleConns          int
@@ -35,6 +33,24 @@ type Config struct {
 	TLSHandshakeTimeout   time.Duration
 	ExpectContinueTimeout time.Duration
 	ResponseHeaderTimeout time.Duration
+
+	// SSHTunnelHops is a list of hostnames we will tunnel through. Entries can
+	// be host names or can optionally specify username and port using some
+	// subset of user@host:port
+	SSHTunnelHops []string
+
+	// SSHEnableAgent enables SSH agent support
+	SSHEnableAgent bool
+
+	// SSHKeyFilename path to SSH secret key file
+	SSHKeyFilename string
+
+	// SSHKeyFilePassword optional password for ssh private key file
+	SSHKeyFilePassword string
+
+	// SSHKnownHostsFilename if specified we will use the known hosts to verify
+	// the server keys along the tunnel hop chain.
+	SSHKnownHostsFilename string
 }
 
 // TLSMode specifies what TLS checking we are going to do.
@@ -64,25 +80,58 @@ const (
 
 // newDialContextFunc returns a newDialContextFunc if we have defined an SSH tunnel and nil otherwise.
 func (c *Config) newDialContextFunc() (contextDialerFunc, error) {
-	if len(c.SSHTunnel) == 0 {
+	if len(c.SSHTunnelHops) == 0 {
 		return nil, nil
 	}
 
-	slog.Debug("using SSH tunnel", "tunnel", c.SSHTunnel)
+	slog.Debug("using SSH tunnel", "tunnel", c.SSHTunnelHops)
 
-	tunnel, err := tunnel.Create(tunnel.Config{Hops: c.SSHTunnel})
+	//tun, err := tunnel.Create(tunnel.Config{Hops: c.SSHTunnel})
+	hops, err := tunnel.ParseHops(c.SSHTunnelHops)
+	if err != nil {
+		return nil, err
+	}
+
+	options := []tunnel.Option{
+		tunnel.WithConnTracking(true),
+		tunnel.WithHops(hops...),
+	}
+
+	// use SSH key from file if specified
+	if c.SSHKeyFilename != "" {
+		if c.SSHKeyFilePassword != "" {
+			options = append(options, tunnel.WithKeyFile(c.SSHKeyFilename, []byte(c.SSHKeyFilePassword)))
+		} else {
+			options = append(options, tunnel.WithKeyFile(c.SSHKeyFilename, nil))
+		}
+	}
+
+	// If we specify a known hosts file we will verify host keys for the
+	// tunnel chain.  If not we skip this.
+	if c.SSHKnownHostsFilename != "" {
+		options = append(options, tunnel.WithKnownHosts(c.SSHKnownHostsFilename))
+	} else {
+		options = append(options, tunnel.WithHostKeyCallback(ssh.InsecureIgnoreHostKey()))
+	}
+
+	// if c.SSHEnableAgent is set we will use the SSH agent
+	if c.SSHEnableAgent {
+		options = append(options, tunnel.WithAgent())
+	}
+
+	tun, err := tunnel.Create(options...)
 	if err != nil {
 		return nil, err
 	}
 
 	return func(_ context.Context, network, addr string) (net.Conn, error) {
-		slog.Debug("dial using tunnel", "tunnel", c.SSHTunnel, "network", network, "addr", addr)
-		conn, err := tunnel.Dial(network, addr)
+		slog.Debug("dial using tunnel", "tunnel", c.SSHTunnelHops, "network", network, "addr", addr)
+		conn, err := tun.Dial(network, addr)
 		if err != nil {
-			slog.Debug("dial failed", "tunnel", c.SSHTunnel, "network", network, "addr", addr)
+			slog.Debug("dial failed", "tunnel", c.SSHTunnelHops, "network", network, "addr", addr)
 			return nil, err
 		}
-		slog.Debug("dial success", "tunnel", c.SSHTunnel, "network", network, "addr", addr)
+		slog.Debug("dial success", "tunnel", c.SSHTunnelHops, "network", network, "addr", addr)
 		return conn, nil
 	}, nil
 }
