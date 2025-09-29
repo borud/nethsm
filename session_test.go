@@ -370,10 +370,20 @@ func TestSession(t *testing.T) {
 	require.Equal(t, "overridden", cert.Subject.CommonName)
 	slog.Info("Subject override succeeded")
 
+	// Get TLS certificate from connection
+	certFromConnection, err := session.GetTLSCertificateFromConnection()
+	require.NoError(t, err)
+	require.NotEmpty(t, certFromConnection)
+	slog.Info("GetTLSCertificateFromConnection succeeded")
+
 	// Test using TLS certificate from NetHSM
 	tlsCertificate, err := session.GetTLSCertificate()
 	require.NoError(t, err)
 	slog.Info("GetTLSCertificate succeeded")
+
+	// make sure the TLS certificates match
+	require.Equal(t, tlsCertificate, certFromConnection)
+	slog.Info("GetTLSCertificate / GetTLSCertificateFromConnection match")
 
 	tlsTestSession, err := NewSession(Config{
 		Username:          "admin",
