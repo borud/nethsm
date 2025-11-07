@@ -282,6 +282,7 @@ func (s *Session) GetCertificate(keyID string) (string, error) {
 	if err != nil {
 		return "", errors.Join(err, asError(resp))
 	}
+	defer removeFile(file) // next line executes before this, so remove after close
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
