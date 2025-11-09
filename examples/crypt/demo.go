@@ -15,15 +15,15 @@ import (
 )
 
 // Demo is just a struct to manage the sessions and the temporary key name.
-type demo struct {
+type Demo struct {
 	adminSession    *nethsm.Session
 	operatorSession *nethsm.Session
 	keyName         string
 }
 
 // NewDemo creates a new demo instance
-func NewDemo(adminSession, operatorSession *nethsm.Session) *demo {
-	return &demo{
+func NewDemo(adminSession, operatorSession *nethsm.Session) *Demo {
+	return &Demo{
 		adminSession:    adminSession,
 		operatorSession: operatorSession,
 		keyName:         fmt.Sprintf("rsaDemoKey%d", time.Now().UnixMilli()),
@@ -31,12 +31,12 @@ func NewDemo(adminSession, operatorSession *nethsm.Session) *demo {
 }
 
 // getKeyName returns the key name
-func (d *demo) getKeyName() string {
+func (d *Demo) getKeyName() string {
 	return d.keyName
 }
 
 // createKey creates the key we use for encryption and decryption.
-func (d *demo) createKey() error {
+func (d *Demo) createKey() error {
 	err := d.adminSession.GenerateKey(
 		d.keyName,
 		api.KEYTYPE_RSA,
@@ -53,7 +53,7 @@ func (d *demo) createKey() error {
 }
 
 // getPublicKey fetches the public key and ensures it is an RSA key.
-func (d *demo) getPublicKey() (*rsa.PublicKey, error) {
+func (d *Demo) getPublicKey() (*rsa.PublicKey, error) {
 	pub, err := d.operatorSession.GetPublicKey(d.keyName)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (d *demo) getPublicKey() (*rsa.PublicKey, error) {
 }
 
 // cleanup removes the key we use for testing
-func (d *demo) cleanup() error {
+func (d *Demo) cleanup() error {
 	err := d.adminSession.DeleteKey(d.keyName)
 	if err != nil {
 		return fmt.Errorf("error removing key %s: %w", d.keyName, err)
@@ -77,7 +77,7 @@ func (d *demo) cleanup() error {
 }
 
 // messageRaw demonstrates usage of the api.DECRYPTMODE_RAW mode
-func (d *demo) messageRaw() error {
+func (d *Demo) messageRaw() error {
 	pub, err := d.getPublicKey()
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (d *demo) messageRaw() error {
 }
 
 // messagePKCS1 demonstrates usage of the api.DECRYPTMODE_PKCS1 mode
-func (d *demo) messagePKCS1() error {
+func (d *Demo) messagePKCS1() error {
 	pub, err := d.getPublicKey()
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func (d *demo) messagePKCS1() error {
 }
 
 // messageOAEP demonstrates usage of the api.DECRYPTMODE_OAEP_SHA256
-func (d *demo) messageOAEP() error {
+func (d *Demo) messageOAEP() error {
 	pub, err := d.getPublicKey()
 	if err != nil {
 		return err
