@@ -79,6 +79,84 @@ func TestSession(t *testing.T) {
 	require.Equal(t, info.Vendor, "Nitrokey GmbH")
 	slog.Info("GetInfo succeeded")
 
+	// Check unattended boot
+	unattendedBoot, err := session.GetUnattendedBoot()
+	require.NoError(t, err)
+	require.Equal(t, api.SWITCH_OFF, *unattendedBoot)
+
+	// turn on unattended boot
+	err = session.SetUnattendedBoot(api.SWITCH_ON)
+	require.NoError(t, err)
+
+	// verify result
+	unattendedBoot, err = session.GetUnattendedBoot()
+	require.NoError(t, err)
+	require.Equal(t, api.SWITCH_ON, *unattendedBoot)
+
+	// turn it off again (needed for later test)
+	err = session.SetUnattendedBoot(api.SWITCH_OFF)
+	require.NoError(t, err)
+	slog.Info("Unattended boot tests succeeded")
+
+	// Network config
+	networkConfig, err := session.GetNetworkConfig()
+	require.NoError(t, err)
+
+	err = session.SetNetworkConfig(api.NetworkConfig{
+		IpAddress: networkConfig.IpAddress,
+		Netmask:   "255.255.0.0", // this should be ok to change without disrupting tests
+		Gateway:   networkConfig.Gateway,
+	})
+
+	// re-fetch network config
+	networkConfig, err = session.GetNetworkConfig()
+	require.NoError(t, err)
+	require.Equal(t, "255.255.0.0", networkConfig.Netmask)
+	slog.Info("Network config succeeded")
+
+	// Logging config tests
+	loggingConfig, err := session.GetLoggingConfig()
+	require.NoError(t, err)
+
+	// set logging config
+	err = session.SetLoggingConfig(api.LoggingConfig{
+		IpAddress: "127.0.0.1",
+		Port:      9988,
+		LogLevel:  "error",
+	})
+	require.NoError(t, err)
+
+	loggingConfigModified, err := session.GetLoggingConfig()
+	require.NoError(t, err)
+	require.Equal(t, "127.0.0.1", loggingConfigModified.GetIpAddress())
+	require.Equal(t, int32(9988), loggingConfigModified.GetPort())
+	require.Equal(t, api.LOGLEVEL_ERROR, loggingConfigModified.GetLogLevel())
+
+	// resetset logging config to original
+	err = session.SetLoggingConfig(api.LoggingConfig{
+		IpAddress: loggingConfig.GetIpAddress(),
+		Port:      loggingConfig.GetPort(),
+		LogLevel:  loggingConfig.GetLogLevel(),
+	})
+	require.NoError(t, err)
+	slog.Info("Logging config succeeded")
+
+	// Time config
+	timeConfig, err := session.GetTime()
+	require.NoError(t, err)
+	require.Equal(t, 1, timeConfig.GetTime().Year()) // assumes time is not set in docker instance
+
+	// Set time
+	err = session.SetTime(api.TimeConfig{Time: time.Now()})
+	require.NoError(t, err)
+
+	timeConfigUpdated, err := session.GetTime()
+	require.NoError(t, err)
+	// make sure the difference between the system time we read back from HSM
+	// and our system time is less than a minute
+	require.Less(t, time.Since(timeConfigUpdated.GetTime()), time.Minute)
+	slog.Info("GetTime/SetTime succeeded")
+
 	// Test GetUser
 	userData, err := session.GetUser("admin")
 	require.NoError(t, err)

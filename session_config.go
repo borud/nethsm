@@ -103,3 +103,93 @@ func (s *Session) SetTLSCertificate(pem string) error {
 
 	return nil
 }
+
+// GetUnattendedBoot returns *api.Switch type.  If an error occurs it returns nil and an error.
+func (s *Session) GetUnattendedBoot() (*api.Switch, error) {
+	conf, resp, err := s.client.ConfigUnattendedBootGet(s.authCtx).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return nil, errors.Join(err, asError(resp))
+	}
+
+	return conf.GetStatus().Ptr(), nil
+}
+
+// SetUnattendedBoot sets unattended boot.  If on parameter is true we turn
+// unattended boot on.  If it is false we turn it off.
+func (s Session) SetUnattendedBoot(unattended api.Switch) error {
+	res, err := s.client.
+		ConfigUnattendedBootPut(s.authCtx).
+		UnattendedBootConfig(api.UnattendedBootConfig{Status: unattended}).
+		Execute()
+	defer closeBody(res)
+	if err != nil {
+		return errors.Join(err, asError(res))
+	}
+	return nil
+}
+
+// GetNetworkConfig fetches the network config.
+func (s *Session) GetNetworkConfig() (*api.NetworkConfig, error) {
+	conf, resp, err := s.client.ConfigNetworkGet(s.authCtx).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return nil, errors.Join(err, asError(resp))
+	}
+
+	return conf, nil
+}
+
+// SetNetworkConfig set the network config.
+func (s *Session) SetNetworkConfig(conf api.NetworkConfig) error {
+	resp, err := s.client.ConfigNetworkPut(s.authCtx).NetworkConfig(conf).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return errors.Join(err, asError(resp))
+	}
+	return nil
+}
+
+// GetLoggingConfig returns the logging config.
+func (s *Session) GetLoggingConfig() (*api.LoggingConfig, error) {
+	conf, resp, err := s.client.ConfigLoggingGet(s.authCtx).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return nil, errors.Join(err, asError(resp))
+	}
+
+	return conf, nil
+}
+
+// SetLoggingConfig set the logging config
+func (s *Session) SetLoggingConfig(conf api.LoggingConfig) error {
+	resp, err := s.client.ConfigLoggingPut(s.authCtx).LoggingConfig(conf).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return errors.Join(err, asError(resp))
+	}
+	return nil
+}
+
+// GetTime returns the current system time.
+func (s *Session) GetTime() (*api.TimeConfig, error) {
+	timeConfig, resp, err := s.client.ConfigTimeGet(s.authCtx).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return nil, errors.Join(err, asError(resp))
+	}
+	return timeConfig, nil
+}
+
+// SetTime set the system time.
+func (s *Session) SetTime(conf api.TimeConfig) error {
+	// the REST API requires the time to be in UTC, so ensure the timezone is UTC.
+	conf.Time = conf.GetTime().UTC()
+
+	resp, err := s.client.ConfigTimePut(s.authCtx).TimeConfig(conf).Execute()
+	defer closeBody(resp)
+	if err != nil {
+		return errors.Join(err, asError(resp))
+	}
+	return nil
+}
