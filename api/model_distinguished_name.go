@@ -19,7 +19,7 @@ import (
 // checks if the DistinguishedName type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DistinguishedName{}
 
-// DistinguishedName struct for DistinguishedName
+// DistinguishedName Data used for creation of CSRs. If subjectAltNames is omitted, it is set to the same value as commonName. If it is set to an empty list, no SAN Extension is added. 
 type DistinguishedName struct {
 	CountryName *string `json:"countryName,omitempty"`
 	StateOrProvinceName *string `json:"stateOrProvinceName,omitempty"`
@@ -28,6 +28,7 @@ type DistinguishedName struct {
 	OrganizationalUnitName *string `json:"organizationalUnitName,omitempty"`
 	CommonName string `json:"commonName"`
 	EmailAddress *string `json:"emailAddress,omitempty"`
+	SubjectAltNames []string `json:"subjectAltNames,omitempty"`
 }
 
 type _DistinguishedName DistinguishedName
@@ -266,6 +267,38 @@ func (o *DistinguishedName) SetEmailAddress(v string) {
 	o.EmailAddress = &v
 }
 
+// GetSubjectAltNames returns the SubjectAltNames field value if set, zero value otherwise.
+func (o *DistinguishedName) GetSubjectAltNames() []string {
+	if o == nil || IsNil(o.SubjectAltNames) {
+		var ret []string
+		return ret
+	}
+	return o.SubjectAltNames
+}
+
+// GetSubjectAltNamesOk returns a tuple with the SubjectAltNames field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DistinguishedName) GetSubjectAltNamesOk() ([]string, bool) {
+	if o == nil || IsNil(o.SubjectAltNames) {
+		return nil, false
+	}
+	return o.SubjectAltNames, true
+}
+
+// HasSubjectAltNames returns a boolean if a field has been set.
+func (o *DistinguishedName) HasSubjectAltNames() bool {
+	if o != nil && !IsNil(o.SubjectAltNames) {
+		return true
+	}
+
+	return false
+}
+
+// SetSubjectAltNames gets a reference to the given []string and assigns it to the SubjectAltNames field.
+func (o *DistinguishedName) SetSubjectAltNames(v []string) {
+	o.SubjectAltNames = v
+}
+
 func (o DistinguishedName) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -294,6 +327,9 @@ func (o DistinguishedName) ToMap() (map[string]interface{}, error) {
 	toSerialize["commonName"] = o.CommonName
 	if !IsNil(o.EmailAddress) {
 		toSerialize["emailAddress"] = o.EmailAddress
+	}
+	if !IsNil(o.SubjectAltNames) {
+		toSerialize["subjectAltNames"] = o.SubjectAltNames
 	}
 	return toSerialize, nil
 }

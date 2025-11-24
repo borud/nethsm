@@ -14,6 +14,12 @@ type Session struct {
 	authCtx context.Context
 }
 
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
 // NewSession creates a news session.
 func NewSession(config Config) (*Session, error) {
 	if config.MaxIdleConns == 0 {
@@ -45,22 +51,35 @@ func NewSession(config Config) (*Session, error) {
 		return nil, err
 	}
 
-	// Create the HTTP client depending on parameters
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			Proxy:               http.ProxyFromEnvironment,
-			TLSClientConfig:     config.tlsConfig(),
-			DialContext:         dialer,
-			DisableKeepAlives:   config.DisableKeepAlives,
-			MaxIdleConns:        config.MaxIdleConns,
-			MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
-			MaxConnsPerHost:     config.MaxIdleConns,
-			IdleConnTimeout:     config.IdleConnTimeout,
+	transport := &http.Transport{
+		Proxy:               http.ProxyFromEnvironment,
+		TLSClientConfig:     config.tlsConfig(),
+		DialContext:         dialer,
+		DisableKeepAlives:   config.DisableKeepAlives,
+		MaxIdleConns:        config.MaxIdleConns,
+		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
+		MaxConnsPerHost:     config.MaxIdleConns,
+		IdleConnTimeout:     config.IdleConnTimeout,
 
-			TLSHandshakeTimeout:   config.TLSHandshakeTimeout,
-			ExpectContinueTimeout: config.ExpectContinueTimeout,
-			ResponseHeaderTimeout: config.ResponseHeaderTimeout,
-		},
+		TLSHandshakeTimeout:   config.TLSHandshakeTimeout,
+		ExpectContinueTimeout: config.ExpectContinueTimeout,
+		ResponseHeaderTimeout: config.ResponseHeaderTimeout,
+	}
+
+	httpClient := &http.Client{
+		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			// The NetHSM code is very picky about the Accept header and
+			// changes have been made to the OpenAPI definition that adds
+			// new content types to existing calls without bumping the
+			// version.  This results in HTTP 406 errors if you use an API
+			// version that defines a different set of accept headers from
+			// those in a particular version of the NetHSM software.
+			//
+			// As a workaround we just remove the Accept header produced by
+			// the generated code.
+			req.Header.Del("Accept")
+			return transport.RoundTrip(req)
+		}),
 	}
 
 	// configure the OpenAPI client

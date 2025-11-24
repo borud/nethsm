@@ -2,9 +2,9 @@
 .PHONY: slow-test
 .PHONY: vet
 .PHONY: staticcheck
-.PHONY: gen-nethsm-rest-api
 .PHONY: lint
 .PHONY: clean
+.PHONY: api
 
 default: vet lint test
 
@@ -28,7 +28,7 @@ lint:
 	@echo "*** $@"
 	@revive ./...
 
-gen-nethsm-rest-api:
+api:
 	@echo "*** $@"
 	docker run --rm -ti \
 		-v "${PWD}:/local" \
